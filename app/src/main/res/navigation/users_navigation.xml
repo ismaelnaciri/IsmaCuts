@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/navigation"
+    app:startDestination="@id/usersHomeFragment">
+
+    <fragment
+        android:id="@+id/usersHomeFragment"
+        android:name="cat.insvidreres.inf.ismacuts.users.home.UsersHomeFragment"
+        android:label="UsersHomeFragment" />
+</navigation>

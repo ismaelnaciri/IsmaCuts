@@ -9,5 +9,86 @@
         android:layout_height="match_parent"
         tools:context=".login.LoginActivity">
 
+        <ImageView
+            android:id="@+id/loginLogoIV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="80dp"
+            android:minWidth="90dp"
+            android:minHeight="90dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.498"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <EditText
+            android:id="@+id/loginEmailET"
+            android:drawableStart="@drawable/baseline_email_24"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="92dp"
+            android:ems="10"
+            android:hint="Email"
+            android:inputType="textEmailAddress"
+            android:minHeight="48dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.495"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/loginLogoIV" />
+
+
+        <EditText
+            android:id="@+id/loginPasswordET"
+            android:drawableStart="@drawable/baseline_lock_24"
+            android:drawableEnd="@drawable/baseline_remove_red_eye_24"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="68dp"
+            android:ems="10"
+            android:hint="Password"
+            android:inputType="textPassword"
+            android:minHeight="48dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.495"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/loginEmailET" />
+
+        <CheckBox
+            android:id="@+id/rememberPasswordCB"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Remember Password"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.229"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/loginPasswordET" />
+
+        <TextView
+            android:id="@+id/loginForgetPasswordTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Forgot Password?"
+            android:textColor="#7957D3"
+            app:layout_constraintBottom_toTopOf="@+id/loginPageLoginButton"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.222"
+            app:layout_constraintStart_toEndOf="@+id/rememberPasswordCB"
+            app:layout_constraintTop_toBottomOf="@+id/loginPasswordET"
+            app:layout_constraintVertical_bias="0.182" />
+
+        <Button
+            android:id="@+id/loginPageLoginButton"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="52dp"
+            android:text="Log In"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.495"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/rememberPasswordCB"
+            app:layout_constraintVertical_bias="1.0" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

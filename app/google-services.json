@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "417580188805",
+    "project_id": "ismacuts-a6d41",
+    "storage_bucket": "ismacuts-a6d41.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:417580188805:android:53f94ba5e1d5471c4a95ec",
+        "android_client_info": {
+          "package_name": "cat.insvidreres.inf.ismacuts"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD5LtGd8O8J54xOocagdmvcSq1BDBcG7Vo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
