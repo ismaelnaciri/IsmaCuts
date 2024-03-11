@@ -42,6 +42,7 @@ android {
 
 dependencies {
 
+    implementation("androidx.activity:activity:1.8.0")
     val nav_version = "2.7.5"
     val lifecycle_version = "2.6.2"
     val glide_version = "4.16.0"

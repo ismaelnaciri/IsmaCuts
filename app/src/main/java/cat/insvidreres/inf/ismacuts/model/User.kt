@@ -1,9 +1,10 @@
 package cat.insvidreres.inf.ismacuts.model
 
 data class User(
-    val id: String,
-    val firstName: String,
-    val lastName: String,
-    val dateOfBirth: String,
-    val admin: Boolean,
+    val username: String,
+    val email: String,
+    val password: String,
+//    val dateOfBirth: String,
+    val admin: Boolean = false,
+    val id: String = "",
 )

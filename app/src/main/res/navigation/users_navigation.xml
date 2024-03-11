@@ -8,4 +8,8 @@
         android:id="@+id/usersHomeFragment"
         android:name="cat.insvidreres.inf.ismacuts.users.home.UsersHomeFragment"
         android:label="UsersHomeFragment" />
+    <fragment
+        android:id="@+id/usersBookingFragment"
+        android:name="cat.insvidreres.inf.ismacuts.users.booking.UsersBookingFragment"
+        android:label="UsersBookingFragment" />
 </navigation>

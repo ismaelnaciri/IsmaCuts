@@ -32,26 +32,26 @@
             app:layout_constraintTop_toBottomOf="@+id/mainScreenLogoIV" />
 
         <Button
-            android:id="@+id/mainScreenSignInButton"
+            android:id="@+id/mainScreenLoginButton"
             android:layout_width="338dp"
             android:layout_height="56dp"
             android:layout_marginTop="100dp"
-            android:text="Button"
+            android:text="Login"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.479"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/mainScreenDescriptionTV" />
 
         <Button
-            android:id="@+id/button2"
+            android:id="@+id/mainScreenRegisterButton"
             android:layout_width="336dp"
             android:layout_height="58dp"
-            android:text="Button"
+            android:text="Register"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.493"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/mainScreenSignInButton"
+            app:layout_constraintTop_toBottomOf="@+id/mainScreenLoginButton"
             app:layout_constraintVertical_bias="0.347" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

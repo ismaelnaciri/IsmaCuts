@@ -25,19 +25,19 @@
             />
 <!--            tools:layout="@layout/fragment_catalog" />-->
 
-        <com.google.android.material.bottomnavigation.BottomNavigationView
-            android:id="@+id/bottomMenuView"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:background="@color/bottom_nav_background"
-            app:itemIconTint="@drawable/bottom_nav_colors"
-            app:itemTextColor="@drawable/bottom_nav_colors"
-            app:labelVisibilityMode="selected"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:menu="@menu/menu" />
+<!--        <com.google.android.material.bottomnavigation.BottomNavigationView-->
+<!--            android:id="@+id/bottomMenuView"-->
+<!--            android:layout_width="0dp"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:background="@color/bottom_nav_background"-->
+<!--            app:itemIconTint="@drawable/bottom_nav_colors"-->
+<!--            app:itemTextColor="@drawable/bottom_nav_colors"-->
+<!--            app:labelVisibilityMode="selected"-->
+<!--            app:layout_constraintBottom_toBottomOf="parent"-->
+<!--            app:layout_constraintEnd_toEndOf="parent"-->
+<!--            app:layout_constraintHorizontal_bias="0.0"-->
+<!--            app:layout_constraintStart_toStartOf="parent"-->
+<!--            app:menu="@menu/menu" />-->
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

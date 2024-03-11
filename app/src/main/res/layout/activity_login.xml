@@ -57,10 +57,11 @@
             android:id="@+id/rememberPasswordCB"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="44dp"
+            android:minHeight="48dp"
             android:text="Remember Password"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.229"
+            app:layout_constraintHorizontal_bias="0.225"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/loginPasswordET" />
 
@@ -72,16 +73,17 @@
             android:textColor="#7957D3"
             app:layout_constraintBottom_toTopOf="@+id/loginPageLoginButton"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.222"
+            app:layout_constraintHorizontal_bias="0.263"
             app:layout_constraintStart_toEndOf="@+id/rememberPasswordCB"
             app:layout_constraintTop_toBottomOf="@+id/loginPasswordET"
-            app:layout_constraintVertical_bias="0.182" />
+            app:layout_constraintVertical_bias="0.306" />
 
         <Button
             android:id="@+id/loginPageLoginButton"
             android:layout_width="300dp"
             android:layout_height="wrap_content"
             android:layout_marginBottom="52dp"
+            android:background="@drawable/main_gradient"
             android:text="Log In"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
