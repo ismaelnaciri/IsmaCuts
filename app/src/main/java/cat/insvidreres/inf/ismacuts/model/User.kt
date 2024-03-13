@@ -7,4 +7,5 @@ data class User(
 //    val dateOfBirth: String,
     val admin: Boolean = false,
     val id: String = "",
+    val img: String = ""
 )

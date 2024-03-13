@@ -4,6 +4,7 @@
     <color name="white">#FFFFFFFF</color>
 
     <color name="background">#BCA365</color>
+    <color name="blue">#82CAFF</color>
 
     <color name="bottom_nav_background">#FEDBD0</color>
     <color name="bottom_nav_item">#8C706D</color>

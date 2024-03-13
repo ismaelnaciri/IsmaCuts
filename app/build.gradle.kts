@@ -69,6 +69,9 @@ dependencies {
     //Glide Images
     implementation("com.github.bumptech.glide:glide:${glide_version}")
 
+    //Picasso
+    implementation("com.squareup.picasso:picasso:2.8")
+
     //Room
     implementation("androidx.room:room-runtime:$room_version")
     implementation("androidx.room:room-ktx:${room_version}")

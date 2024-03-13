@@ -2,9 +2,11 @@ package cat.insvidreres.inf.ismacuts.register
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import cat.insvidreres.inf.ismacuts.R
 import cat.insvidreres.inf.ismacuts.databinding.ActivityRegisterBinding
@@ -25,7 +27,71 @@ class RegisterActivity : AppCompatActivity(), ErrorHandler {
 
     private val viewModel: RegisterViewModel by viewModels()
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    //TODO -> Move this code to ItemSelected Of Recycler Activity
+//    private var imageUri: Uri? = null
+//    private val resultLauncher = registerForActivityResult(
+//        ActivityResultContracts.GetContent()
+//    ) {
+//        imageUri = it
+//        binding.userImageEdit.setImageURI(imageUri)
+//    }
+
+    //binding.imageView.setOnClickListener {
+    //            resultLauncher.launch("image/*")
+    //        }
+
+    /*
+    <ImageView
+                android:id="@+id/imageView"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:scaleType="fitXY"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/vector" />
+
+
+    private fun uploadImage() {
+        storageRef = storageRef.child("Images/")
+        imageUri?.let {
+            storageRef.putFile(it).addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+
+                    storageRef.downloadUrl.addOnSuccessListener { uri ->
+
+                        val map = HashMap<String, Any>()
+                        map["pic"] = uri.toString()
+
+                        firebaseFirestore.collection("users")
+                            .document()
+                            .add(map)
+                            .addOnCompleteListener { firestoreTask ->
+
+                            if (firestoreTask.isSuccessful){
+                                Toast.makeText(this, "Uploaded Successfully", Toast.LENGTH_SHORT).show()
+
+                            }else{
+                                Toast.makeText(this, firestoreTask.exception?.message, Toast.LENGTH_SHORT).show()
+
+                            }
+                            binding.imageView.setImageResource(R.drawable.vector)
+
+                        }
+                    }
+                } else {
+                    Toast.makeText(this, task.exception?.message, Toast.LENGTH_SHORT).show()
+                    binding.progressBar.visibility = View.GONE
+                    binding.imageView.setImageResource(R.drawable.vector)
+                }
+            }
+        }
+    }
+    */
+
+        override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)

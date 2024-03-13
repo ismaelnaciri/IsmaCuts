@@ -5,8 +5,8 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.activity.viewModels
+import cat.insvidreres.inf.ismacuts.recycler.RecyclerActivity
 import cat.insvidreres.inf.ismacuts.databinding.ActivityLoginBinding
-import cat.insvidreres.inf.ismacuts.users.UsersMainActivity
 import cat.insvidreres.inf.ismacuts.utils.ErrorHandler
 import com.google.firebase.Firebase
 import com.google.firebase.analytics.FirebaseAnalytics
@@ -47,7 +47,7 @@ class LoginActivity : AppCompatActivity(), ErrorHandler {
 
 
     private fun goToMainActivity(context: Context) {
-        val intent = Intent(context, UsersMainActivity::class.java)
+        val intent = Intent(context, RecyclerActivity::class.java)
         startActivity(intent)
     }
 
