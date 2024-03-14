@@ -11,6 +11,7 @@ import cat.insvidreres.inf.ismacuts.R
 import cat.insvidreres.inf.ismacuts.UserSharedViewModel
 import cat.insvidreres.inf.ismacuts.databinding.ActivitySelectedUserBinding
 import cat.insvidreres.inf.ismacuts.model.User
+import com.bumptech.glide.Glide
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -36,12 +37,9 @@ class SelectedUser : AppCompatActivity() {
         }
 
         binding.deleteButton.setOnClickListener {
-            viewModel.deleteUser(User(
-                binding.usernameET.text.toString(),
-                binding.emailET.text.toString(),
-                binding.passwordET.text.toString(),
-                binding.adminSwitch.isChecked
-            ))
+            if (receivedUser != null) {
+                viewModel.deleteUser(receivedUser)
+            }
         }
 
         binding.UpdateButton.setOnClickListener {
@@ -76,7 +74,7 @@ class SelectedUser : AppCompatActivity() {
         binding.usernameET.setText(user.username)
         binding.emailET.setText(user.email)
         binding.passwordET.setText(user.password)
-
         binding.adminSwitch.isChecked = (user.admin.toString() === "true")
+        Glide.with(binding.selectedUserIV.context).load(user.img).into(binding.selectedUserIV)
     }
 }
