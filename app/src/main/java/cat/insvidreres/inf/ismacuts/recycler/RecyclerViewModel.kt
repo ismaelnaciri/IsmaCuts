@@ -12,7 +12,11 @@ class RecyclerViewModel : ViewModel() {
     val users: LiveData<MutableList<User>> = _users
 
     fun loadUsers() {
-        Repository.addUsersToList()
-        _users.value = Repository.recyclerList
+        _users.value = mutableListOf<User>()
+
+        Repository.addUsersToList {
+            _users.value = Repository.recyclerList
+
+        }
     }
 }

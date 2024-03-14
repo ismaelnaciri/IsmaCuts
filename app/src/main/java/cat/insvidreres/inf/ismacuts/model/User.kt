@@ -1,5 +1,7 @@
 package cat.insvidreres.inf.ismacuts.model
 
+import java.io.Serializable
+
 data class User(
     val username: String,
     val email: String,
@@ -8,4 +10,4 @@ data class User(
     val admin: Boolean = false,
     val id: String = "",
     val img: String = ""
-)
+) : Serializable

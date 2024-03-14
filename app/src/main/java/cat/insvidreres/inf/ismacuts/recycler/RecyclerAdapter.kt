@@ -20,7 +20,7 @@ class RecyclerAdapter(val context: Context, var usersList: List<User>, private v
             binding.recyclerEmailTV.text = user.email
             binding.recyclerAdminAnswerTV.text = user.admin.toString()
 
-//            Glide.with(binding.userRecyclerIV.context).load(user.img).into(binding.userRecyclerIV)
+            Glide.with(binding.userRecyclerIV.context).load(user.img).into(binding.userRecyclerIV)
 //            Picasso.get().load(user.img).into(binding.userRecyclerIV)
             Log.d("Img url from bind fun", user.img)
             binding.root.setOnClickListener {

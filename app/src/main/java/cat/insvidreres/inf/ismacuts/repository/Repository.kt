@@ -15,7 +15,7 @@ import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 
-class Repository: ErrorHandler {
+class Repository : ErrorHandler {
 
     companion object {
         var haircuts: LiveData<List<Haircut>>? = null
@@ -63,7 +63,7 @@ class Repository: ErrorHandler {
             if (item != null && docName == "") {
                 db.collection(collection)
                     .add(item)
-                    .addOnFailureListener {e ->
+                    .addOnFailureListener { e ->
                         Log.d("Firestore addItemToCollection", e.message.toString())
                     }
             } else if (item != null && docName != "") {
@@ -78,31 +78,32 @@ class Repository: ErrorHandler {
             }
         }
 
-        fun addUsersToList() {
-
-            if (recyclerList.isNotEmpty()) {
-                recyclerList = mutableListOf<User>()
-            }
+        fun addUsersToList(onComplete: () -> Unit) {
             val db = Firebase.firestore
 
             db.collection("users")
                 .get()
                 .addOnSuccessListener {
+                    val list = mutableListOf<User>()
                     for (i in it) {
-                        recyclerList.add(
-                            User(
+                        val user = User(
                                 i.data["username"].toString(),
                                 i.data["email"].toString(),
                                 i.data["password"].toString(),
                                 i.data["admin"].toString().toBoolean(),
                                 "",
                                 i.data["img"].toString()
-                                )
                         )
+                        list.add(user)
                     }
+
+                    recyclerList = list
+                    onComplete()
+                }
+                .addOnFailureListener { e ->
+                    Log.w("Firestore", e.message.toString())
                 }
         }
-
 
 
         fun readFromFirebaseStorage(imageUri: Uri?) {
@@ -124,11 +125,49 @@ class Repository: ErrorHandler {
             val ONE_MEGABYTE: Long = 1024 * 1024
 
             testReference.getBytes(ONE_MEGABYTE)
-                .addOnSuccessListener {data ->
+                .addOnSuccessListener { data ->
 
                 }
                 .addOnFailureListener { e ->
                     Log.d("ERROR Reading storage", e.message.toString())
+                }
+        }
+
+        fun updateUser(oldUser: User, newUser: User, onComplete: () -> Unit) {
+            val db = Firebase.firestore
+
+            db.collection("users")
+                .whereEqualTo("email", oldUser.email)
+                .get()
+                .addOnSuccessListener { docs ->
+                    for (doc in docs) {
+                        db.collection("users")
+                            .document(doc.id)
+                            .update(hashMapOf<String, Any>(
+                                "username" to newUser.username,
+                                "email" to newUser.email,
+                                "password" to newUser.password,
+                                "admin" to newUser.admin,
+                                "img" to newUser.img,
+                                "id" to newUser.id
+                            ))
+                    }
+                    onComplete()
+                }
+        }
+
+        fun deleteUser(user: User, onComplete: () -> Unit) {
+            val db = Firebase.firestore
+
+            db.collection("users")
+                .whereEqualTo("email", user.email)
+                .whereEqualTo("username", user.username)
+                .get()
+                .addOnSuccessListener { docs ->
+                    for (doc in docs) {
+                        db.collection("users").document(doc.id).delete()
+                    }
+                    onComplete()
                 }
         }
     }
