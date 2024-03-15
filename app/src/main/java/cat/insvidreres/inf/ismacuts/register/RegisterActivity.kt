@@ -62,48 +62,48 @@ class RegisterActivity : AppCompatActivity(), ErrorHandler {
             }
         }
 
-//        binding.googleSignInButton.setOnClickListener {
-//            mAuth = FirebaseAuth.getInstance()
-//            val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-//                .requestIdToken("417580188805-2rnfeultah6ra1hirf7ghiigg0apmt3u.apps.googleusercontent.com")
-//                .requestEmail()
-//                .build()
-//
-//            mGoogleSignInClient = GoogleSignIn.getClient(this, gso)
-//            val googleSignInIntent = mGoogleSignInClient.signInIntent
-//            startActivityForResult(googleSignInIntent, RC_SIGN_IN)
-//        }
+        binding.googleSignInButton.setOnClickListener {
+            mAuth = FirebaseAuth.getInstance()
+            val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken("417580188805-2rnfeultah6ra1hirf7ghiigg0apmt3u.apps.googleusercontent.com")
+                .requestEmail()
+                .build()
+
+            mGoogleSignInClient = GoogleSignIn.getClient(this, gso)
+            val googleSignInIntent = mGoogleSignInClient.signInIntent
+            startActivityForResult(googleSignInIntent, RC_SIGN_IN)
+        }
 
     }
 
-//    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-//        super.onActivityResult(requestCode, resultCode, data)
-//
-//        if (requestCode == RC_SIGN_IN) {
-//            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
-//            try {
-//                val account = task.getResult(ApiException::class.java)
-//                firebaseAuthWithGoogle(account.idToken!!)
-//            } catch (e: ApiException) {
-//                Toast.makeText(this, "Google sign in failed: ${e.message.toString()}", Toast.LENGTH_LONG).show()
-//            }
-//        }
-//    }
-//
-//    private fun firebaseAuthWithGoogle(idToken: String) {
-//        val credential = GoogleAuthProvider.getCredential(idToken, null)
-//        mAuth.signInWithCredential(credential)
-//            .addOnCompleteListener(this) { task ->
-//                if (task.isSuccessful) {
-//                    val user = mAuth.currentUser
-//                    Toast.makeText(this, "Signed in as ${user?.displayName}", Toast.LENGTH_SHORT).show()
-//                    startActivity(Intent(this, RecyclerActivity::class.java))
-//                    finish()
-//                } else {
-//                    Toast.makeText(this, "Authentication failed", Toast.LENGTH_SHORT).show()
-//                }
-//            }
-//    }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == RC_SIGN_IN) {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+            try {
+                val account = task.getResult(ApiException::class.java)
+                firebaseAuthWithGoogle(account.idToken!!)
+            } catch (e: ApiException) {
+                Toast.makeText(this, "Google sign in failed: ${e.message.toString()}", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    private fun firebaseAuthWithGoogle(idToken: String) {
+        val credential = GoogleAuthProvider.getCredential(idToken, null)
+        mAuth.signInWithCredential(credential)
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
+                    val user = mAuth.currentUser
+                    Toast.makeText(this, "Signed in as ${user?.displayName}", Toast.LENGTH_SHORT).show()
+                    startActivity(Intent(this, RecyclerActivity::class.java))
+                    finish()
+                } else {
+                    Toast.makeText(this, "Authentication failed", Toast.LENGTH_SHORT).show()
+                }
+            }
+    }
 
     private fun goToLogin(context: Context) {
         val intent = Intent(context, LoginActivity::class.java)
