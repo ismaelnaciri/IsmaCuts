@@ -13,6 +13,6 @@ class RegisterViewModel : ViewModel() {
     val user : LiveData<User> = _user
 
     fun createAccount(user: User) {
-        return Repository.insertUser(user)
+        Repository.insertUser(user)
     }
 }

@@ -1,5 +1,6 @@
 package cat.insvidreres.inf.ismacuts.recycler
 
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -13,10 +14,10 @@ class SelectedUserViewModel : ViewModel() {
 //    private var _user = MutableLiveData<User>()
 //    val user : LiveData<User> = _user
 
-    fun updateUser(oldUser: User, newUser: User) {
+    fun updateUser(oldUser: User, newUser: User, imgUri: Uri?) {
 
         try {
-            Repository.updateUser(oldUser, newUser) {
+            Repository.updateUser(oldUser, newUser, imgUri) {
                 Log.i("update user function", "Updated user successfully")
             }
         } catch (e: Exception) {

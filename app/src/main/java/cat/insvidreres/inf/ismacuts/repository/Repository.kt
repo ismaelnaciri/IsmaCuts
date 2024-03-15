@@ -34,6 +34,7 @@ class Repository : ErrorHandler {
                                 "email" to user.email,
                                 "password" to user.password,
                                 "admin" to user.admin,
+                                "img" to user.img
                             )
                         )
                     }
@@ -133,27 +134,66 @@ class Repository : ErrorHandler {
                 }
         }
 
-        fun updateUser(oldUser: User, newUser: User, onComplete: () -> Unit) {
+        fun updateUser(oldUser: User, newUser: User, imgUri: Uri?, onComplete: () -> Unit) {
             val db = Firebase.firestore
+            var imgUrl: String = ""
 
-            db.collection("users")
-                .whereEqualTo("email", oldUser.email)
-                .get()
-                .addOnSuccessListener { docs ->
-                    for (doc in docs) {
-                        db.collection("users")
-                            .document(doc.id)
-                            .update(hashMapOf<String, Any>(
-                                "username" to newUser.username,
-                                "email" to newUser.email,
-                                "password" to newUser.password,
-                                "admin" to newUser.admin,
-                                "img" to newUser.img,
-                                "id" to newUser.id
-                            ))
+            storageRef = FirebaseStorage.getInstance().reference.child("/Images")
+
+            if (oldUser.email != newUser.email
+                && oldUser.img != "https://firebasestorage.googleapis.com/v0/b/ismacuts-a6d41.appspot.com/o/Images%2Fplaceholder_pfp.jpg?alt=media&token=51075713-0a43-48a0-922e-426d75f85552") {
+                storageRef.child(oldUser.email + "-pfp").delete()
+            }
+            storageRef = storageRef.child(newUser.email + "-pfp")
+
+            imgUri?.let {
+                storageRef.putFile(it).addOnCompleteListener{ task ->
+                    if (task.isSuccessful) {
+
+                        storageRef.downloadUrl.addOnSuccessListener { uri ->
+                            imgUrl = uri.toString()
+                            newUser.img = imgUrl
+
+                            Log.i("newUser.img", newUser.img)
+
+                            db.collection("users")
+                                .whereEqualTo("email", oldUser.email)
+                                .get()
+                                .addOnSuccessListener { docs ->
+                                    for (doc in docs) {
+                                        db.collection("users")
+                                            .document(doc.id)
+                                            .update(hashMapOf<String, Any>(
+                                                "username" to newUser.username,
+                                                "email" to newUser.email,
+                                                "password" to newUser.password,
+                                                "admin" to newUser.admin,
+                                                "img" to newUser.img,
+                                                "id" to newUser.id
+                                            ))
+                                            .addOnSuccessListener {
+                                                if (oldUser.email != newUser.email) {
+                                                    FirebaseAuth.getInstance().currentUser?.updateEmail(newUser.email)
+                                                    FirebaseAuth.getInstance().currentUser?.updatePassword(newUser.password)
+
+//                                                    FirebaseAuth.getInstance().
+                                                }
+                                            }
+                                    }
+                                    onComplete()
+                                }
+                                .addOnFailureListener { exception ->
+                                    Log.e("Error in getting the users (update)", exception.message.toString())
+                                }
+                        }
+                            .addOnFailureListener { exception ->
+                                Log.e("url download error", exception.message.toString())
+                            }
+                    } else {
+                        Log.e("storage upload", "Error uploading file gg")
                     }
-                    onComplete()
                 }
+            }
         }
 
         fun deleteUser(user: User, onComplete: () -> Unit) {

@@ -1,7 +1,9 @@
 package cat.insvidreres.inf.ismacuts.recycler
 
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -22,6 +24,7 @@ class SelectedUser : AppCompatActivity() {
     private lateinit var binding: ActivitySelectedUserBinding
     private lateinit var db: FirebaseFirestore
     private lateinit var storage: FirebaseStorage
+    private var imageUri: Uri? = null
 
     private val viewModel: SelectedUserViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,24 +53,25 @@ class SelectedUser : AppCompatActivity() {
                         binding.usernameET.text.toString(),
                         binding.emailET.text.toString(),
                         binding.passwordET.text.toString(),
-                        binding.adminSwitch.isChecked
-                    ))
+                        binding.adminSwitch.isChecked,
+                        "",
+
+                    ),
+                    imageUri)
             }
         }
-        //TODO -> Get user from firestore and check if the values in the form are different than new ones
-        //TODO -> Methods go to repository
-//        db.collection("users").whereEqualTo("email", userSharedViewModel.user.value?.email).get().addOnSuccessListener { doc ->
-        //          for (d in doc) {
-        //          if(d.data["email"] === userSharedViewModel.user.value?.email
-        //              && d.data["password"] === userSharedViewModel.user.value?.password) {
-//        FirebaseAuth.getInstance().currentUser?.updatePassword(binding.passwordET.text.toString())
-        //
-        //              }
-        //          }
-        //        }
-//        FirebaseAuth.getInstance().currentUser?.updateEmail(binding.emailET.text.toString())
-//        db.collection("users").whereEqualTo("email", userSharedViewModel.user.value?.email)
-//            .get()
+
+        binding.selectedUserIV.setOnClickListener {
+            resultLauncher.launch("image/*")
+        }
+
+    }
+
+    private val resultLauncher = registerForActivityResult(
+        ActivityResultContracts.GetContent()){
+
+        imageUri = it
+        binding.selectedUserIV.setImageURI(it)
     }
 
     private fun initValues(user: User, binding: ActivitySelectedUserBinding) {
