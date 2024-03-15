@@ -11,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId = "cat.insvidreres.inf.ismacuts"
-        minSdk = 33
+        minSdk = 26
         targetSdk = 33
         versionCode = 1
         versionName = "1.0"
@@ -84,4 +84,7 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-storage")
+
+    //Google SignIn
+    implementation("com.google.android.gms:play-services-auth:21.0.0")
 }

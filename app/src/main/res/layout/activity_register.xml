@@ -21,7 +21,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <com.google.android.gms.common.SignInButton
-            android:id="@+id/signInButton"
+            android:id="@+id/googleSignInButton"
             android:layout_width="168dp"
             android:layout_height="54dp"
             android:layout_marginTop="36dp"
@@ -38,7 +38,7 @@
             android:layout_marginTop="20dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/signInButton">
+            app:layout_constraintTop_toBottomOf="@+id/googleSignInButton">
 
             <TextView
                 android:id="@+id/tvTextInBetween"
