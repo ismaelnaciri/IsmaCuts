@@ -4,6 +4,9 @@ import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.text.method.PasswordTransformationMethod
+import android.view.View
+import android.widget.EditText
 import androidx.activity.viewModels
 import cat.insvidreres.inf.ismacuts.recycler.RecyclerActivity
 import cat.insvidreres.inf.ismacuts.databinding.ActivityLoginBinding
@@ -32,17 +35,18 @@ class LoginActivity : AppCompatActivity(), ErrorHandler {
 
         binding.loginPageLoginButton.setOnClickListener {
             if (binding.loginEmailET.text.isNotEmpty() &&
-                binding.loginPasswordET.text.isNotEmpty())
+                !binding.passwordT.text.isNullOrEmpty())
             {
 
                 val email = binding.loginEmailET.text.toString()
-                val password = binding.loginPasswordET.text.toString()
+                val password = binding.passwordT.text.toString()
 
-                viewModel.loginWithEmailAndPw(email, password)
-
-                goToMainActivity(this)
+                if(viewModel.loginWithEmailAndPw(email, password)) {
+                    goToMainActivity(this)
+                }
             }
         }
+
     }
 
 

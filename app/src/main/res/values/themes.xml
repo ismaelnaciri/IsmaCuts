@@ -6,4 +6,8 @@
     </style>
 
     <style name="Theme.IsmaCuts" parent="Base.Theme.IsmaCuts" />
+
+    <style name="SplashTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowBackground">@drawable/splas_background</item>
+    </style>
 </resources>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:tools="http://schemas.android.com/tools"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
@@ -14,17 +14,24 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <ImageView
-                android:id="@+id/userRecyclerIV"
-                android:layout_width="75dp"
-                android:layout_height="80dp"
+            <androidx.cardview.widget.CardView
+                android:id="@+id/userRecyclerIVCardView"
+                android:layout_width="90dp"
+                android:layout_height="90dp"
                 android:layout_marginStart="16dp"
-                android:contentDescription="TODO"
-                android:minWidth="50dp"
-                android:minHeight="50dp"
+                app:cardCornerRadius="45dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.47">
+
+                <ImageView
+                    android:id="@+id/userRecyclerIV"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="TODO"
+                    />
+            </androidx.cardview.widget.CardView>
 
             <TextView
                 android:id="@+id/recyclerUsernameTV"
@@ -37,7 +44,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/recyclerAdminAnounceTV"
                 app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toEndOf="@+id/userRecyclerIV"
+                app:layout_constraintStart_toEndOf="@+id/userRecyclerIVCardView"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias="0.245" />
 
@@ -52,7 +59,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/recyclerAdminAnounceTV"
                 app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toEndOf="@+id/userRecyclerIV"
+                app:layout_constraintStart_toEndOf="@+id/userRecyclerIVCardView"
                 app:layout_constraintTop_toBottomOf="@+id/recyclerUsernameTV"
                 app:layout_constraintVertical_bias="0.489" />
 

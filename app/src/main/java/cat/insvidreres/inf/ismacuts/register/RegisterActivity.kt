@@ -5,6 +5,9 @@ import android.content.Intent
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.text.method.PasswordTransformationMethod
+import android.view.View
+import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -28,7 +31,7 @@ class RegisterActivity : AppCompatActivity(), ErrorHandler {
     private val viewModel: RegisterViewModel by viewModels()
 
 
-        override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -36,10 +39,11 @@ class RegisterActivity : AppCompatActivity(), ErrorHandler {
         binding.registerPageSignUpButton.setOnClickListener {
             if (binding.registerUsernameET.text.toString() !== ""
                 && binding.registerEmailET.text.toString() !== ""
-                && binding.registerPasswordET.text.toString() !== ""
-            ) {
+                && binding.passwordRegisterT.text.toString() !== ""
+            )
+            {
                 val email = binding.registerEmailET.text.toString()
-                val password = binding.registerPasswordET.text.toString()
+                val password = binding.passwordRegisterT.text.toString()
                 val username = binding.registerUsernameET.text.toString()
 
                 viewModel.createAccount(User(username, email, password))
@@ -47,6 +51,7 @@ class RegisterActivity : AppCompatActivity(), ErrorHandler {
                 goToLogin(this)
             }
         }
+
     }
 
     private fun goToLogin(context: Context) {

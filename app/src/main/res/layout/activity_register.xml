@@ -100,33 +100,55 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/registerUsernameET" />
 
-        <EditText
+        <!--        <EditText-->
+<!--            android:id="@+id/registerPasswordET"-->
+<!--            android:layout_width="300dp"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_marginTop="52dp"-->
+<!--            android:drawableStart="@drawable/baseline_lock_24"-->
+<!--            android:ems="10"-->
+<!--            android:hint="Password"-->
+<!--            android:inputType="textPassword"-->
+<!--            android:minHeight="48dp"-->
+<!--            app:layout_constraintEnd_toEndOf="parent"-->
+<!--            app:layout_constraintHorizontal_bias="0.495"-->
+<!--            app:layout_constraintStart_toStartOf="parent"-->
+<!--            app:layout_constraintTop_toBottomOf="@+id/registerEmailET" />-->
+
+        <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/registerPasswordET"
             android:layout_width="300dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="52dp"
-            android:drawableStart="@drawable/baseline_lock_24"
-            android:drawableEnd="@drawable/baseline_remove_red_eye_24"
-            android:ems="10"
-            android:hint="Password"
-            android:inputType="textPassword"
-            android:minHeight="48dp"
+            android:layout_marginTop="40dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.495"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/registerEmailET" />
+            app:layout_constraintTop_toBottomOf="@+id/registerEmailET"
+            app:passwordToggleEnabled="true">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/passwordRegisterT"
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="68dp"
+                android:drawableStart="@drawable/baseline_lock_24"
+                android:ems="10"
+                android:hint="Password"
+                android:inputType="textPassword"
+                android:minHeight="48dp" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <Button
             android:id="@+id/registerPageSignUpButton"
             android:layout_width="300dp"
             android:layout_height="wrap_content"
-            android:text="Sign Up"
             android:background="@drawable/main_gradient"
+            android:text="Sign Up"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.495"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/registerPasswordET"
-            app:layout_constraintVertical_bias="0.371" />
+            app:layout_constraintVertical_bias="0.418" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

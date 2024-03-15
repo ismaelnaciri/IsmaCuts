@@ -29,7 +29,7 @@ class MainScreenActivity : AppCompatActivity() {
         }
 
         Glide.with(binding.mainScreenLogoIV.context).
-        load("https://firebasestorage.googleapis.com/v0/b/ismacuts-a6d41.appspot.com/o/Images%2Fbarber_logo.jpg?alt=media&token=4b7440b2-5329-4274-a332-e314896bd5d4")
+        load("https://firebasestorage.googleapis.com/v0/b/ismacuts-a6d41.appspot.com/o/Images%2Fbarber_logo-removebg-preview.png?alt=media&token=20d7ae70-c3b9-4b81-958f-63a24c154464")
             .into(binding.mainScreenLogoIV)
     }
 }

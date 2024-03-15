@@ -35,13 +35,10 @@ class RecyclerActivity : AppCompatActivity() {
         userBinding = UserItemEntregaBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-//        val userSharedViewModel: UserSharedViewModel = ViewModelProvider(this)[UserSharedViewModel::class.java]
-
         binding.usersRecyclerView.setHasFixedSize(true)
         binding.usersRecyclerView.layoutManager = LinearLayoutManager(this)
 
         val userAdapter = RecyclerAdapter(this, emptyList(), userBinding) { selectedItem ->
-//            userSharedViewModel.selectUser(selectedItem)
 
             Toast.makeText(
                 this,
@@ -58,6 +55,10 @@ class RecyclerActivity : AppCompatActivity() {
         viewModel.users.observe(this) { usersList ->
             userAdapter.usersList = usersList
             binding.usersRecyclerView.adapter = userAdapter
+        }
+
+        binding.refreshButton.setOnClickListener {
+            viewModel.loadUsers()
         }
     }
 }

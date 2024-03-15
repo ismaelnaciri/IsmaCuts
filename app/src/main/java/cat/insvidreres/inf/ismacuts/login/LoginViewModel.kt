@@ -7,7 +7,7 @@ class LoginViewModel: ViewModel() {
 
 
 
-    fun loginWithEmailAndPw(email: String, password: String) {
-        Repository.signIn(email, password)
+    fun loginWithEmailAndPw(email: String, password: String): Boolean {
+        return Repository.signIn(email, password)
     }
 }

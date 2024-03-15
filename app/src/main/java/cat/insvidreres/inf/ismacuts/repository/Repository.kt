@@ -10,10 +10,16 @@ import cat.insvidreres.inf.ismacuts.model.Haircut
 import cat.insvidreres.inf.ismacuts.model.User
 import cat.insvidreres.inf.ismacuts.utils.ErrorHandler
 import com.google.firebase.Firebase
+import com.google.firebase.auth.AuthCredential
+import com.google.firebase.auth.EmailAuthCredential
+import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import java.security.MessageDigest
+import java.util.Base64
 
 class Repository : ErrorHandler {
 
@@ -21,8 +27,11 @@ class Repository : ErrorHandler {
         var haircuts: LiveData<List<Haircut>>? = null
         private lateinit var storageRef: StorageReference
         var recyclerList = mutableListOf<User>()
+        private val SALT: String = "+isma1234~$"
 
         fun insertUser(user: User) {
+            user.password = encryptPassword(user.password)
+
             FirebaseAuth.getInstance()
                 .createUserWithEmailAndPassword(user.email, user.password)
                 .addOnCompleteListener {
@@ -43,11 +52,17 @@ class Repository : ErrorHandler {
             Log.d("User fields test", "email | ${user.email}  |  password ${user.password}")
         }
 
-        fun signIn(email: String, password: String) {
-            FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
-                .addOnFailureListener { e ->
-                    Log.d("login failure", e.message.toString())
-                }
+        fun signIn(email: String, password: String): Boolean {
+            try {
+                FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
+                    .addOnFailureListener { e ->
+                        Log.d("login failure", e.message.toString())
+                    }
+            } catch (e: Exception) {
+                Log.e("Error signIn", e.message.toString())
+                return false
+            }
+            return true
         }
 
         fun insertHaircut(context: Context, haircut: Haircut) {
@@ -88,12 +103,12 @@ class Repository : ErrorHandler {
                     val list = mutableListOf<User>()
                     for (i in it) {
                         val user = User(
-                                i.data["username"].toString(),
-                                i.data["email"].toString(),
-                                i.data["password"].toString(),
-                                i.data["admin"].toString().toBoolean(),
-                                "",
-                                i.data["img"].toString()
+                            i.data["username"].toString(),
+                            i.data["email"].toString(),
+                            i.data["password"].toString(),
+                            i.data["admin"].toString().toBoolean(),
+                            "",
+                            i.data["img"].toString()
                         )
                         list.add(user)
                     }
@@ -138,16 +153,19 @@ class Repository : ErrorHandler {
             val db = Firebase.firestore
             var imgUrl: String = ""
 
+            FirebaseAuth.getInstance().currentUser?.email?.let { Log.i("Current User email?", it) }
+
             storageRef = FirebaseStorage.getInstance().reference.child("/Images")
 
             if (oldUser.email != newUser.email
-                && oldUser.img != "https://firebasestorage.googleapis.com/v0/b/ismacuts-a6d41.appspot.com/o/Images%2Fplaceholder_pfp.jpg?alt=media&token=51075713-0a43-48a0-922e-426d75f85552") {
+                && oldUser.img != "https://firebasestorage.googleapis.com/v0/b/ismacuts-a6d41.appspot.com/o/Images%2Fplaceholder_pfp.jpg?alt=media&token=51075713-0a43-48a0-922e-426d75f85552"
+            ) {
                 storageRef.child(oldUser.email + "-pfp").delete()
             }
             storageRef = storageRef.child(newUser.email + "-pfp")
 
             imgUri?.let {
-                storageRef.putFile(it).addOnCompleteListener{ task ->
+                storageRef.putFile(it).addOnCompleteListener { task ->
                     if (task.isSuccessful) {
 
                         storageRef.downloadUrl.addOnSuccessListener { uri ->
@@ -163,27 +181,92 @@ class Repository : ErrorHandler {
                                     for (doc in docs) {
                                         db.collection("users")
                                             .document(doc.id)
-                                            .update(hashMapOf<String, Any>(
-                                                "username" to newUser.username,
-                                                "email" to newUser.email,
-                                                "password" to newUser.password,
-                                                "admin" to newUser.admin,
-                                                "img" to newUser.img,
-                                                "id" to newUser.id
-                                            ))
+                                            .update(
+                                                hashMapOf<String, Any>(
+                                                    "username" to newUser.username,
+                                                    "email" to newUser.email,
+                                                    "password" to newUser.password,
+                                                    "admin" to newUser.admin,
+                                                    "img" to newUser.img,
+                                                    "id" to newUser.id
+                                                )
+                                            )
                                             .addOnSuccessListener {
                                                 if (oldUser.email != newUser.email) {
-                                                    FirebaseAuth.getInstance().currentUser?.updateEmail(newUser.email)
-                                                    FirebaseAuth.getInstance().currentUser?.updatePassword(newUser.password)
+                                                    val credential: AuthCredential =
+                                                        EmailAuthProvider.getCredential(
+                                                            oldUser.email,
+                                                            oldUser.password
+                                                        )
+                                                    FirebaseAuth.getInstance().currentUser?.reauthenticate(
+                                                        credential
+                                                    )
+                                                        ?.addOnSuccessListener { task ->
+                                                            FirebaseAuth.getInstance().currentUser?.verifyBeforeUpdateEmail(
+                                                                newUser.email
+                                                            )
+                                                                ?.addOnSuccessListener {
+                                                                    Log.i(
+                                                                        "email update",
+                                                                        "Email updated successfully"
+                                                                    )
 
-//                                                    FirebaseAuth.getInstance().
+                                                                    val credential: AuthCredential =
+                                                                        EmailAuthProvider.getCredential(
+                                                                            oldUser.email,
+                                                                            oldUser.password
+                                                                        )
+                                                                    FirebaseAuth.getInstance().currentUser?.reauthenticate(
+                                                                        credential
+                                                                    )
+                                                                        ?.addOnSuccessListener {
+                                                                            FirebaseAuth.getInstance().currentUser?.updatePassword(
+                                                                                newUser.password
+                                                                            )
+                                                                                ?.addOnSuccessListener {
+                                                                                    Log.i(
+                                                                                        "Passw updated",
+                                                                                        "Pass updates successfully"
+                                                                                    )
+                                                                                }
+                                                                        }
+
+
+//                                                                            ?.addOnCompleteListener {
+//
+//                                                                                FirebaseAuth.getInstance()
+//                                                                                    .signOut()
+//                                                                                FirebaseAuth.getInstance()
+//                                                                                    .signInWithEmailAndPassword(
+//                                                                                        newUser.email,
+//                                                                                        newUser.password
+//                                                                                    )
+//                                                                                    .addOnCompleteListener {
+//                                                                                        Log.i(
+//                                                                                            "Logged in with new user?",
+//                                                                                            "Email: ${FirebaseAuth.getInstance().currentUser?.email} "
+//                                                                                        )
+//                                                                                    }
+//
+//
+//                                                                            }
+
+
+                                                                    Log.i(
+                                                                        "Credentials",
+                                                                        "Auth credentials updated? check"
+                                                                    )
+                                                                }
+                                                        }
                                                 }
                                             }
                                     }
-                                    onComplete()
                                 }
                                 .addOnFailureListener { exception ->
-                                    Log.e("Error in getting the users (update)", exception.message.toString())
+                                    Log.e(
+                                        "Error in getting the users (update)",
+                                        exception.message.toString()
+                                    )
                                 }
                         }
                             .addOnFailureListener { exception ->
@@ -197,6 +280,23 @@ class Repository : ErrorHandler {
         }
 
         fun deleteUser(user: User, onComplete: () -> Unit) {
+            FirebaseAuth.getInstance().signOut()
+            FirebaseAuth.getInstance().signInWithEmailAndPassword(user.email, user.password)
+                .addOnSuccessListener { authResult ->
+                    authResult.user?.delete()
+                        ?.addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                onComplete()
+                            } else {
+                                // Failed to delete user
+                                Log.e("deleteUser", "Failed to delete user: ${task.exception}")
+                            }
+                        }
+                }
+                .addOnFailureListener { exception ->
+                    Log.e("deleteUser", "Failed to sign in: ${exception.message}")
+                }
+
             val db = Firebase.firestore
 
             db.collection("users")
@@ -209,6 +309,13 @@ class Repository : ErrorHandler {
                     }
                     onComplete()
                 }
+        }
+
+        private fun encryptPassword(password: String) : String {
+            val saltedPW = password + SALT
+            val digest = MessageDigest.getInstance("SHA-256")
+            val hashedBytes = digest.digest(saltedPW.toByteArray(Charsets.UTF_8))
+            return Base64.getEncoder().encodeToString(hashedBytes)
         }
     }
 

@@ -1,5 +1,6 @@
 package cat.insvidreres.inf.ismacuts.recycler
 
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
@@ -39,9 +40,13 @@ class SelectedUser : AppCompatActivity() {
             initValues(receivedUser, binding)
         }
 
+
         binding.deleteButton.setOnClickListener {
             if (receivedUser != null) {
                 viewModel.deleteUser(receivedUser)
+
+                val intent = Intent(this, RecyclerActivity::class.java)
+                startActivity(intent)
             }
         }
 

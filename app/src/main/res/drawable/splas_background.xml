@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    >
+
+    <item android:drawable="@color/background" />
+
+    <item
+        android:bottom="230dp"
+        android:left="10dp"
+        android:right="10dp"
+        android:top="230dp"
+        >
+
+        <bitmap android:src="@drawable/barber_logo_removebg" />
+
+    </item>
+</layer-list>

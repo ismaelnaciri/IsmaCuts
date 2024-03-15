@@ -37,21 +37,28 @@
             app:layout_constraintTop_toBottomOf="@+id/loginLogoIV" />
 
 
-        <EditText
+        <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/loginPasswordET"
-            android:drawableStart="@drawable/baseline_lock_24"
-            android:drawableEnd="@drawable/baseline_remove_red_eye_24"
             android:layout_width="300dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="68dp"
-            android:ems="10"
-            android:hint="Password"
-            android:inputType="textPassword"
-            android:minHeight="48dp"
+            android:layout_marginTop="44dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.495"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/loginEmailET" />
+            app:layout_constraintTop_toBottomOf="@+id/loginEmailET"
+            app:passwordToggleEnabled="true">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/passwordT"
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="68dp"
+                android:drawableStart="@drawable/baseline_lock_24"
+                android:ems="10"
+                android:hint="Password"
+                android:inputType="textPassword"
+                android:minHeight="48dp" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <CheckBox
             android:id="@+id/rememberPasswordCB"
