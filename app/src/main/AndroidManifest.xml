@@ -13,6 +13,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.IsmaCuts">
         <activity
+            android:name=".admins.AdminsMainActivity"
+            android:exported="false" />
+        <activity
             android:name=".SplashActivity"
             android:exported="true"
             android:theme="@style/SplashTheme">
@@ -22,7 +25,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".recycler.SelectedUser"
             android:exported="false" />
@@ -31,9 +33,7 @@
             android:exported="false" />
         <activity
             android:name=".main_screen.MainScreenActivity"
-            android:exported="false">
-
-        </activity>
+            android:exported="false"></activity>
         <activity
             android:name=".login.LoginActivity"
             android:exported="false" />

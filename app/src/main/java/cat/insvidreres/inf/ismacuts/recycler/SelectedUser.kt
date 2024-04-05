@@ -28,6 +28,7 @@ class SelectedUser : AppCompatActivity() {
     private var imageUri: Uri? = null
 
     private val viewModel: SelectedUserViewModel by viewModels()
+    private val recyclerViewModel: RecyclerViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         db = Firebase.firestore
 
@@ -45,6 +46,7 @@ class SelectedUser : AppCompatActivity() {
             if (receivedUser != null) {
                 viewModel.deleteUser(receivedUser)
 
+                recyclerViewModel.loadUsers()
                 val intent = Intent(this, RecyclerActivity::class.java)
                 startActivity(intent)
             }

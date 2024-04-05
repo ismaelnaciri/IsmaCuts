@@ -52,6 +52,8 @@ class Repository : ErrorHandler {
             Log.d("User fields test", "email | ${user.email}  |  password ${user.password}")
         }
 
+        //TODO
+        //Change so that it kn ows if email is admin
         fun signIn(email: String, password: String): Boolean {
             try {
                 FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
@@ -232,25 +234,6 @@ class Repository : ErrorHandler {
                                                                         }
 
 
-//                                                                            ?.addOnCompleteListener {
-//
-//                                                                                FirebaseAuth.getInstance()
-//                                                                                    .signOut()
-//                                                                                FirebaseAuth.getInstance()
-//                                                                                    .signInWithEmailAndPassword(
-//                                                                                        newUser.email,
-//                                                                                        newUser.password
-//                                                                                    )
-//                                                                                    .addOnCompleteListener {
-//                                                                                        Log.i(
-//                                                                                            "Logged in with new user?",
-//                                                                                            "Email: ${FirebaseAuth.getInstance().currentUser?.email} "
-//                                                                                        )
-//                                                                                    }
-//
-//
-//                                                                            }
-
 
                                                                     Log.i(
                                                                         "Credentials",
@@ -311,7 +294,7 @@ class Repository : ErrorHandler {
                 }
         }
 
-        private fun encryptPassword(password: String) : String {
+        private fun encryptPassword(password: String): String {
             val saltedPW = password + SALT
             val digest = MessageDigest.getInstance("SHA-256")
             val hashedBytes = digest.digest(saltedPW.toByteArray(Charsets.UTF_8))

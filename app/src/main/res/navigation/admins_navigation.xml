@@ -2,19 +2,19 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/navigation"
-    app:startDestination="@id/usersHomeFragment">
+    android:id="@+id/admins_navigation"
+    app:startDestination="@id/adminsHomeFragment">
 
     <fragment
-        tools:layout="@layout/fragment_users_home"
-        android:id="@+id/usersHomeFragment"
-        android:name="cat.insvidreres.inf.ismacuts.users.home.UsersHomeFragment"
-        android:label="UsersHomeFragment" />
+        android:id="@+id/adminsHomeFragment"
+        android:name="cat.insvidreres.inf.ismacuts.admins.home.AdminsHomeFragment"
+        android:label="fragment_admins_home"
+        tools:layout="@layout/fragment_admins_home" />
     <fragment
-        tools:layout="@layout/fragment_users_booking"
-        android:id="@+id/usersBookingFragment"
-        android:name="cat.insvidreres.inf.ismacuts.users.booking.UsersBookingFragment"
-        android:label="UsersBookingFragment" />
+        android:id="@+id/adminsDashboardFragment"
+        android:name="cat.insvidreres.inf.ismacuts.admins.dashboard.AdminsDashboardFragment"
+        android:label="fragment_admins_dashboard"
+        tools:layout="@layout/fragment_admins_dashboard" />
     <fragment
         android:id="@+id/profileFragment"
         android:name="cat.insvidreres.inf.ismacuts.profile.ProfileFragment"
