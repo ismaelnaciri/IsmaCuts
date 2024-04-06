@@ -8,6 +8,8 @@ import androidx.lifecycle.LiveData
 import cat.insvidreres.inf.ismacuts.model.Beardtrim
 import cat.insvidreres.inf.ismacuts.model.Haircut
 import cat.insvidreres.inf.ismacuts.model.User
+import cat.insvidreres.inf.ismacuts.users.booking.Days
+import cat.insvidreres.inf.ismacuts.users.booking.Hour
 import cat.insvidreres.inf.ismacuts.utils.ErrorHandler
 import com.google.firebase.Firebase
 import com.google.firebase.auth.AuthCredential
@@ -15,11 +17,16 @@ import com.google.firebase.auth.EmailAuthCredential
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import kotlinx.coroutines.tasks.await
 import java.security.MessageDigest
+import java.text.SimpleDateFormat
 import java.util.Base64
+import java.util.Calendar
+import java.util.Locale
 
 class Repository : ErrorHandler {
 
@@ -28,6 +35,9 @@ class Repository : ErrorHandler {
         private lateinit var storageRef: StorageReference
         var recyclerList = mutableListOf<User>()
         private val SALT: String = "+isma1234~$"
+        var daysList = mutableListOf<Days>()
+        var hoursList = mutableListOf<Hour>()
+
 
         fun insertUser(user: User) {
             user.password = encryptPassword(user.password)
@@ -121,6 +131,13 @@ class Repository : ErrorHandler {
                 .addOnFailureListener { e ->
                     Log.w("Firestore", e.message.toString())
                 }
+        }
+
+        fun getDays(onComplete: () -> Unit) {
+            val db = Firebase.firestore
+
+            //Get "days" collection get all values (only 1 document)
+            //Will be compromised of an array of objects
         }
 
 
@@ -299,6 +316,78 @@ class Repository : ErrorHandler {
             val digest = MessageDigest.getInstance("SHA-256")
             val hashedBytes = digest.digest(saltedPW.toByteArray(Charsets.UTF_8))
             return Base64.getEncoder().encodeToString(hashedBytes)
+        }
+
+
+        //To update the days collection
+
+        suspend fun getLastDocumentYear(): Int? {
+            val firestore = Firebase.firestore
+            return try {
+                val querySnapshot = firestore.collection("days")
+                    .orderBy(com.google.firebase.firestore.FieldPath.documentId(), Query.Direction.DESCENDING)
+                    .limit(1)
+                    .get()
+                    .await()
+
+                querySnapshot.documents.firstOrNull()?.id?.toIntOrNull()
+            } catch (e: Exception) {
+                println("Error getting last document year from Firestore: $e")
+                null
+            }
+        }
+
+        fun generateDaysOfYear(year: Int): List<Map<String, Any>> {
+            val daysOfYear = mutableListOf<Map<String, Any>>()
+            val calendar = Calendar.getInstance()
+
+            for (month in Calendar.JANUARY..Calendar.DECEMBER) {
+                calendar.set(year, month, 1)
+
+                val monthName = SimpleDateFormat("MMMM", Locale.getDefault()).format(calendar.time)
+
+                val numDaysInMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
+
+                val monthDays = mutableListOf<Map<String, Any>>()
+
+                for (dayOfMonth in 1..numDaysInMonth) {
+                    calendar.set(year, month, dayOfMonth)
+                    val date = calendar.time
+                    val dayNumber = SimpleDateFormat("d", Locale.getDefault()).format(date).toInt()
+                    val dayName = SimpleDateFormat("EEEE", Locale.getDefault()).format(date)
+
+                    val dayMap = mapOf(
+                        "dayNumber" to dayNumber,
+                        "dayName" to dayName
+                    )
+
+                    monthDays.add(dayMap)
+                }
+
+                val monthMap = mapOf(
+                    "month" to monthName,
+                    "days" to monthDays
+                )
+
+                daysOfYear.add(monthMap)
+            }
+
+            return daysOfYear
+        }
+
+        suspend fun saveDaysToFirestore(year: Int, days: List<Map<String, Any>>) {
+            val firestore = Firebase.firestore
+            try {
+                val daysCollection = firestore.collection("days")
+                val documentRef = daysCollection.document(year.toString())
+
+                documentRef.set(mapOf("data" to days))
+                    .await()
+
+                println("Days for year $year saved successfully to Firestore.")
+            } catch (e: Exception) {
+                println("Error saving days to Firestore: $e")
+            }
         }
     }
 

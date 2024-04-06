@@ -13,10 +13,10 @@ class DaysAdapter(val context: Context, val dataset: List<Days>, val itemOnClick
     inner class DaysViewHolder(var binding: DaysBinding)
         : RecyclerView.ViewHolder(binding.root) {
             fun bind(day: Days) {
-                binding.dayTV.text = day.dayOfWeek
-                binding.dayNumber.text = day.day.toString()
+                binding.dayTV.text = day.day
+                binding.dayNumber.text = day.dayOfWeek.toString()
                 binding.root.setOnClickListener {
-
+                    itemOnClickListener.invoke(day)
                 }
             }
         }
