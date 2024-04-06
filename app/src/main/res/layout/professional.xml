@@ -29,6 +29,7 @@
                         android:id="@+id/professionalImageView"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        app:srcCompat="@drawable/ic_launcher_foreground"
                         />
                 </androidx.cardview.widget.CardView>
 
@@ -37,10 +38,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:layout_marginEnd="200dp"
+                    android:layout_marginEnd="144dp"
                     android:text="Manolo Lama"
+                    android:textColor="@color/black"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="1.0"
                     app:layout_constraintStart_toEndOf="@+id/imageCardViewRoundCorner"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -49,7 +52,7 @@
                     style="?android:attr/ratingBarStyleSmall"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="204dp"
+                    android:layout_marginEnd="200dp"
                     android:isIndicator="true"
                     android:numStars="5"
                     android:rating="3.5"
@@ -57,7 +60,7 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/professionalNameTV"
-                    app:layout_constraintVertical_bias="0.673" />
+                    app:layout_constraintVertical_bias="0.609" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.cardview.widget.CardView>
