@@ -23,12 +23,15 @@ class UsersBookingFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
 
+        //TODO professionalsRV layout and check it works, click appointment and insert it
         binding = FragmentUsersBookingBinding.inflate(inflater)
         val dayRecyclerView = binding.bookingDaysRecyclerView
         val hoursRecyclerView = binding.availableHoursRecyclerView
+        val professionalsRecyclerView = binding.professionalsBookingRV
 
         dayRecyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         hoursRecyclerView.layoutManager = GridLayoutManager(context, 3, GridLayoutManager.VERTICAL, false)
+        professionalsRecyclerView.layoutManager = LinearLayoutManager(context, GridLayoutManager.VERTICAL, false)
 
         val dayAdapter = DaysAdapter(requireContext(), emptyList()) {selectedDay ->
             Toast.makeText(
@@ -48,8 +51,17 @@ class UsersBookingFragment : Fragment() {
             ).show()
         }
 
+        val professionalAdapter = ProfessionalAdapter(requireContext(), emptyList()) { selectedProfessional ->
+            Toast.makeText(
+                requireContext(),
+                "Professional Selected: " + selectedProfessional.name,
+                Toast.LENGTH_LONG
+            ).show()
+        }
+
         viewModel.loadDays()
         viewModel.loadHours()
+        viewModel.loadProfessionals()
 
         viewModel.days.observe(viewLifecycleOwner) { daysList ->
             dayAdapter.dataset = daysList
@@ -59,6 +71,11 @@ class UsersBookingFragment : Fragment() {
         viewModel.hours.observe(viewLifecycleOwner) { hoursList ->
             hourAdapter.dataset = hoursList
             binding.availableHoursRecyclerView.adapter = hourAdapter
+        }
+
+        viewModel.professionals.observe(viewLifecycleOwner) { professionalList ->
+            professionalAdapter.dataset = professionalList
+            binding.professionalsBookingRV.adapter = professionalAdapter
         }
 
         return binding.root

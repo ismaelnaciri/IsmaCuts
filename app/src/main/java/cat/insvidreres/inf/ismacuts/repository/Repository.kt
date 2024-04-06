@@ -7,6 +7,7 @@ import android.widget.Toast
 import androidx.lifecycle.LiveData
 import cat.insvidreres.inf.ismacuts.model.Beardtrim
 import cat.insvidreres.inf.ismacuts.model.Haircut
+import cat.insvidreres.inf.ismacuts.model.Professional
 import cat.insvidreres.inf.ismacuts.model.User
 import cat.insvidreres.inf.ismacuts.users.booking.Days
 import cat.insvidreres.inf.ismacuts.users.booking.Hour
@@ -41,6 +42,7 @@ class Repository : ErrorHandler {
         private val SALT: String = "+isma1234~$"
         var daysList = mutableListOf<Days>()
         var hoursList = mutableListOf<Hour>()
+        var professionalList = mutableListOf<Professional>()
 
 
         fun insertUser(user: User) {
@@ -123,6 +125,7 @@ class Repository : ErrorHandler {
                             i.data["email"].toString(),
                             i.data["password"].toString(),
                             i.data["admin"].toString().toBoolean(),
+                            //TODO get appointments array and
                             "",
                             i.data["img"].toString()
                         )
@@ -134,6 +137,30 @@ class Repository : ErrorHandler {
                 }
                 .addOnFailureListener { e ->
                     Log.w("Firestore", e.message.toString())
+                }
+        }
+
+        fun getProfesionals(service: String, onComplete: () -> Unit) {
+            val db = Firebase.firestore
+
+            db.collection("professionals")
+                .whereArrayContains("services", service)
+                .get()
+                .addOnSuccessListener {
+                    for (professional in it) {
+                        val pro = Professional(
+                            professional.data["name"].toString(),
+                            professional.data["email"].toString(),
+                            professional.data["password"].toString(),
+                            professional.data["reviews"] as List<Number>,
+                            professional.data["services"] as List<String>,
+                            professional.data["img"].toString(),
+                        )
+                        professionalList.add(pro)
+                        println("Professionals list: ${professional}")
+                    }
+
+                    onComplete()
                 }
         }
 

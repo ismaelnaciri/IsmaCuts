@@ -4,17 +4,20 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_width="370dp"
+        android:layout_height="wrap_content"
+        >
 
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
-            android:layout_height="100dp">
+            android:layout_height="match_parent"
+            app:cardCornerRadius="20dp">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
+                android:layout_height="match_parent"
+                android:background="@color/background"
+                >
 
                 <androidx.cardview.widget.CardView
                     android:id="@+id/imageCardViewRoundCorner"
@@ -27,8 +30,8 @@
 
                     <ImageView
                         android:id="@+id/professionalImageView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
                         app:srcCompat="@drawable/ic_launcher_foreground"
                         />
                 </androidx.cardview.widget.CardView>
@@ -38,12 +41,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:layout_marginEnd="144dp"
                     android:text="Manolo Lama"
                     android:textColor="@color/black"
                     android:textSize="20sp"
                     android:textStyle="bold"
                     app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.163"
                     app:layout_constraintStart_toEndOf="@+id/imageCardViewRoundCorner"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -52,13 +55,14 @@
                     style="?android:attr/ratingBarStyleSmall"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="200dp"
                     android:isIndicator="true"
                     android:numStars="5"
                     android:rating="3.5"
                     android:stepSize="0.1"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.126"
+                    app:layout_constraintStart_toEndOf="@+id/imageCardViewRoundCorner"
                     app:layout_constraintTop_toBottomOf="@+id/professionalNameTV"
                     app:layout_constraintVertical_bias="0.609" />
             </androidx.constraintlayout.widget.ConstraintLayout>
