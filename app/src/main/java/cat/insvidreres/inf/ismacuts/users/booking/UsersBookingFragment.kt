@@ -36,6 +36,8 @@ class UsersBookingFragment : Fragment() {
                 "Day selected " + selectedDay.day + " " + selectedDay.dayOfWeek,
                 Toast.LENGTH_LONG
             ).show()
+
+
         }
 
         val hourAdapter = HourAdapter(requireContext(), emptyList()) { selectedHour ->

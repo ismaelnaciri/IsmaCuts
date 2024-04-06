@@ -6,8 +6,12 @@
     <color name="background">#F8F0F0</color>
     <color name="blue">#82CAFF</color>
 
+    <color name="day_recycler_background">#FF81AD</color>
+    <color name="hour_recycler_background">#C800FFFF</color>
+
     <color name="bottom_nav_background">#FEDBD0</color>
     <color name="bottom_nav_item">#8C706D</color>
     <color name="bottom_nav_selected_item">#220006</color>
     <color name="price_text_color">#168118</color>
+    <color name="selected_item_booking_background">#B074EA</color>
 </resources>

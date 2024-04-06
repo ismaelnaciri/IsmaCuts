@@ -4,10 +4,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <LinearLayout
+        android:id="@+id/dayContainer"
         android:layout_width="70dp"
-        android:layout_height="80dp"
+        android:layout_height="70dp"
         android:orientation="horizontal"
-        android:background="@drawable/rounded_corner_background"
+        android:background="@drawable/day_rounded_corner_background"
         android:padding="8dp"
         android:layout_marginEnd="5dp">
 
@@ -20,13 +21,12 @@
                 android:id="@+id/dayTV"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="4dp"
                 android:gravity="center"
-                android:text="Monday"
+                android:text="Mon"
                 android:textColor="@color/black"
-                android:textSize="12sp"
-
-                android:textStyle="normal"
+                android:textSize="16sp"
+                android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
@@ -38,14 +38,15 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:text="1"
-                android:textColor="@color/blue"
+                android:textSize="18sp"
+                android:textColor="@color/white"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/dayTV"
-                app:layout_constraintVertical_bias="0.3" />
+                app:layout_constraintVertical_bias="0.583" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
