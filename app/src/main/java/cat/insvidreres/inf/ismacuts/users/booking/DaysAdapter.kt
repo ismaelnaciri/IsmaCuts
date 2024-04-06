@@ -7,14 +7,14 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import cat.insvidreres.inf.ismacuts.databinding.DaysBinding
 
-class DaysAdapter(val context: Context, val dataset: List<Days>, val itemOnClickListener: (Days) -> Unit) :
+class DaysAdapter(val context: Context, var dataset: List<Days>, val itemOnClickListener: (Days) -> Unit) :
     RecyclerView.Adapter<DaysAdapter.DaysViewHolder>() {
 
     inner class DaysViewHolder(var binding: DaysBinding)
         : RecyclerView.ViewHolder(binding.root) {
             fun bind(day: Days) {
-                binding.dayTV.text = day.day
-                binding.dayNumber.text = day.dayOfWeek.toString()
+                binding.dayTV.text = day.dayOfWeek
+                binding.dayNumber.text = day.day.toString()
                 binding.root.setOnClickListener {
                     itemOnClickListener.invoke(day)
                 }

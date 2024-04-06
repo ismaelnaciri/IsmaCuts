@@ -1,42 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <TableLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:stretchColumns="1,2,3"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
         >
 
-        <TableRow>
-            <Button
-                android:id="@+id/firstHourButton"
-                android:text="test"
-                android:textColor="@color/black"
-                android:textSize="14dp"
-                android:gravity="center"
-                android:layout_column="1"
-                android:padding="5dp"
-                />
-            <Button
-                android:id="@+id/secondHourButton"
-                android:text="test"
-                android:textColor="@color/black"
-                android:textSize="14dp"
-                android:gravity="center"
-                android:layout_column="2"
-                android:padding="5dp"
-                />
+        <Button
+            android:id="@+id/firstHourButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Hour 1"
+            android:textColor="@color/black"
+            android:textSize="14sp"
+            android:gravity="center"
+            android:padding="5dp" />
 
-            <Button
-                android:id="@+id/thirdHourButton"
-                android:text="test"
-                android:textColor="@color/black"
-                android:textSize="14dp"
-                android:gravity="center"
-                android:layout_column="3"
-                android:padding="5dp"
-                />
-        </TableRow>
+    </LinearLayout>
 
-    </TableLayout>
 </layout>

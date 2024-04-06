@@ -34,7 +34,7 @@
             app:layout_constraintTop_toBottomOf="@+id/professionalsLabelTV" />
 
         <androidx.cardview.widget.CardView
-            android:id="@+id/cardView2"
+            android:id="@+id/mainSlotCardView"
             android:layout_width="370dp"
             android:layout_height="230dp"
             android:layout_marginTop="40dp"
@@ -51,30 +51,29 @@
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/bookingDaysRecyclerView"
-                    android:layout_width="319dp"
-                    android:layout_height="80dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    android:clipToPadding="false"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:overScrollMode="never"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:listitem="@layout/days" />
 
-                <TableLayout
+
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/availableHoursRecyclerView"
                     android:layout_width="319dp"
-                    android:layout_height="87dp"
-                    android:stretchColumns="1,2,3"
+                    android:layout_height="90dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.509"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/bookingDaysRecyclerView"
-                    app:layout_constraintVertical_bias="0.234">
+                    app:layout_constraintVertical_bias="0.234" />
 
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/availableHoursRecyclerView"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_marginTop="16dp" />
-                </TableLayout>
             </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.cardview.widget.CardView>
@@ -89,7 +88,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.495"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/cardView2"
+            app:layout_constraintTop_toBottomOf="@+id/mainSlotCardView"
             app:layout_constraintVertical_bias="0.42" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

@@ -8,7 +8,7 @@ import android.widget.Button
 import androidx.recyclerview.widget.RecyclerView
 import cat.insvidreres.inf.ismacuts.databinding.HoursBinding
 
-class HourAdapter(val context: Context, val dataset: List<Hour>, val itemClickListener: (Hour) -> Unit) :
+class HourAdapter(val context: Context, var dataset: List<Hour>, val itemClickListener: (Hour) -> Unit) :
     RecyclerView.Adapter<HourAdapter.HourViewHolder>() {
 
         //Do GridLayout
@@ -26,7 +26,7 @@ class HourAdapter(val context: Context, val dataset: List<Hour>, val itemClickLi
             : RecyclerView.ViewHolder(binding.root) {
                 fun bind(hour: Hour) {
                     binding.firstHourButton.text = hour.hour
-                    binding.root.setOnClickListener {
+                    binding.firstHourButton.setOnClickListener {
                         itemClickListener.invoke(hour)
                     }
                 }

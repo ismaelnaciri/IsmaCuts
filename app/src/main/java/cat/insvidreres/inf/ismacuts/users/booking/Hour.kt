@@ -5,5 +5,4 @@ import java.time.format.DateTimeFormatter
 
 data class Hour(
     var hour: String
-//    var test: Number = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm"))
 )

@@ -21,11 +21,15 @@ import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.security.MessageDigest
 import java.text.SimpleDateFormat
 import java.util.Base64
 import java.util.Calendar
+import java.util.Date
 import java.util.Locale
 
 class Repository : ErrorHandler {
@@ -133,16 +137,67 @@ class Repository : ErrorHandler {
                 }
         }
 
-        fun getDays(onComplete: () -> Unit) {
+        fun getHours(onComplete: () -> Unit) {
             val db = Firebase.firestore
+            hoursList.clear()
 
-            //Get "days" collection get all values (only 1 document)
-            //Will be compromised of an array of objects
+            GlobalScope.launch(Dispatchers.Main) {
+                try {
+                    val documentSnapshot = db.collection("hours")
+                        .document("always")
+                        .get()
+                        .await()
+
+                    val hours = documentSnapshot.data?.get("hours") as List<String>?
+                    if (hours != null) {
+                        hoursList.addAll(hours.map { Hour(it) })
+                        onComplete()
+                        println("Hours list: $hoursList")
+                    } else {
+                        println("No hours data found")
+                    }
+                } catch (e: Exception) {
+                    println("Error fetching hours data: $e")
+                }
+            }
+        }
+
+        fun getDays(onComplete: () -> Unit) {
+            daysList.clear()
+
+            GlobalScope.launch(Dispatchers.Main) {
+                val currentYear = Calendar.getInstance().get(Calendar.YEAR)
+                val currentMonth = Calendar.getInstance().get(Calendar.MONTH) + 1 // Months are 0-indexed in Calendar
+
+                val yearData = getDatesFromFirestore(currentYear)
+                print("YEAR DATA: $yearData")
+
+                if (yearData != null) {
+                    val currentMonthData = yearData.filter {
+                        val month = it["month"] as String
+                        val monthCalendar = Calendar.getInstance()
+                        monthCalendar.time = SimpleDateFormat("MMMM", Locale.ENGLISH).parse(month) ?: Date()
+
+                        monthCalendar.get(Calendar.MONTH) + 1 == currentMonth
+                    }
+
+                    currentMonthData.forEach { day ->
+                        val dayNumber = day["dayNumber"] as Number
+                        val dayOfWeek = day["dayName"] as String
+
+                        daysList.add(Days(dayNumber, dayOfWeek))
+                    }
+
+                    onComplete()
+                    println("Data for current month: $currentMonthData")
+                } else {
+                    println("No data found for the current year")
+                }
+            }
         }
 
 
         fun readFromFirebaseStorage(imageUri: Uri?) {
-
 
             val db = Firebase.firestore
 
@@ -318,7 +373,6 @@ class Repository : ErrorHandler {
             return Base64.getEncoder().encodeToString(hashedBytes)
         }
 
-
         //To update the days collection
 
         suspend fun getLastDocumentYear(): Int? {
@@ -389,6 +443,38 @@ class Repository : ErrorHandler {
                 println("Error saving days to Firestore: $e")
             }
         }
+
+        suspend fun getDatesFromFirestore(year: Int): List<Map<String, Any>> {
+            val firestore = Firebase.firestore
+            return try {
+                val documentSnapshot = firestore.collection("days")
+                    .document(year.toString())
+                    .get()
+                    .await()
+
+                val data = documentSnapshot.data?.get("data") as? List<Map<String, Any>> ?: emptyList()
+
+                data.flatMap { monthData ->
+                    val month = monthData["month"] as? String ?: ""
+                    val days = monthData["days"] as? List<Map<String, Any>> ?: emptyList()
+                    days.map { day ->
+                        val dayNumber = day["dayNumber"] as? Number ?: -1 // Default value or handle appropriately
+                        val dayName = day["dayName"] as? String ?: "" // Default value or handle appropriately
+                        mapOf(
+                            "month" to month,
+                            "dayNumber" to dayNumber,
+                            "dayName" to dayName
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                println("Error getting dates from Firestore: $e")
+                emptyList()
+            }
+        }
+
+
+
     }
 
 }

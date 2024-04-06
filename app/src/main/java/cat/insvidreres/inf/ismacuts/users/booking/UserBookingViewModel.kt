@@ -3,6 +3,7 @@ package cat.insvidreres.inf.ismacuts.users.booking
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import cat.insvidreres.inf.ismacuts.repository.Repository
 
 class UserBookingViewModel : ViewModel() {
 
@@ -15,13 +16,16 @@ class UserBookingViewModel : ViewModel() {
     fun loadDays() {
         _days.value = mutableListOf<Days>()
 
-        //TODO Make repository call
+        Repository.getDays {
+            _days.value = Repository.daysList
+        }
     }
 
     fun loadHours() {
         _hours.value = mutableListOf<Hour>()
 
-        //TODO Make repository call
-
+        Repository.getHours {
+            _hours.value = Repository.hoursList
+        }
     }
 }

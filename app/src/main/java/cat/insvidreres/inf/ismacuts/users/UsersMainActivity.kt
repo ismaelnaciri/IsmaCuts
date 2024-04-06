@@ -3,6 +3,8 @@ package cat.insvidreres.inf.ismacuts.users
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.navigation.NavController
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.NavigationUI.setupWithNavController
 import cat.insvidreres.inf.ismacuts.databinding.ActivityUsersMainBinding
 
 class UsersMainActivity : AppCompatActivity() {
@@ -15,6 +17,10 @@ class UsersMainActivity : AppCompatActivity() {
         binding = ActivityUsersMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val navHostFragment = supportFragmentManager
+        val navHostFragment = supportFragmentManager.findFragmentById(binding.fragmentContainerViewTag.id) as NavHostFragment
+        navController = navHostFragment.navController
+
+        val bottomNavigationView = binding.bottomMenuView
+        setupWithNavController(bottomNavigationView, navController)
     }
 }
