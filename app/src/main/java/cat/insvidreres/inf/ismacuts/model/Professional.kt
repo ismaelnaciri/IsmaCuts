@@ -9,7 +9,7 @@ data class Professional(
     val reviews: MutableList<Number> = mutableListOf<Number>(),
     val services: MutableList<String> = mutableListOf<String>(),
     val appointments: MutableList<Hour> = mutableListOf<Hour>(),
-    val updatedTime: String,
+    val updatedTime: Number,
     var id: String = "",
     var img: String = "https://firebasestorage.googleapis.com/v0/b/ismacuts-a6d41.appspot.com/o/Images%2Fplaceholder_pfp.jpg?alt=media&token=51075713-0a43-48a0-922e-426d75f85552"
 )

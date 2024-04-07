@@ -80,31 +80,36 @@ class UsersBookingFragment : Fragment() {
                 })
         }
 
-        val professionalAdapter = ProfessionalAdapter(requireContext(), emptyList()) { selectedProfessional ->
-            Toast.makeText(
-                requireContext(),
-                "Professional Selected: " + selectedProfessional.name,
-                Toast.LENGTH_LONG
-            ).show()
+        val professionalAdapter =
+            ProfessionalAdapter(requireContext(), emptyList()) { selectedProfessional ->
+                Toast.makeText(
+                    requireContext(),
+                    "Professional Selected: " + selectedProfessional.name,
+                    Toast.LENGTH_LONG
+                ).show()
 
-            viewModel.updateSelectedItems(selectedProfessional,
-                onError = {
-                    Toast.makeText(
-                        requireContext(),
-                        "Error wtf",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                },
-                onDelete = {
-                    Toast.makeText(
-                        requireContext(),
-                        "Deleted item: $selectedProfessional",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                })
+                viewModel.updateSelectedItems(selectedProfessional,
+                    onError = {
+                        Toast.makeText(
+                            requireContext(),
+                            "Error wtf",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    },
+                    onDelete = {
+                        Toast.makeText(
+                            requireContext(),
+                            "Deleted item: $selectedProfessional",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    })
 
-            viewModel.loadHours(selectedProfessional.name)
-            hourAdapter.notifyDataSetChanged()
+                if (viewModel.selectedOptions.any { it is Professional }) {
+                    viewModel.loadHours(selectedProfessional.name)
+                } else {
+                    viewModel.resetHoursArray()
+                }
+                hourAdapter.notifyDataSetChanged()
             }
 
         viewModel.loadDays()
@@ -148,19 +153,14 @@ class UsersBookingFragment : Fragment() {
                         hour = item.hour
                     }
 
-                    else -> {
-                        Toast.makeText(
-                            requireContext(),
-                            "Bug gg wtf",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
                 }
             }
 
             if (name != "" && hour != "" && viewModel.selectedOptions.size == 3) {
                 viewModel.removeHourFromProfessional(name, hour)
                 viewModel.selectedOptions.clear()
+                viewModel.resetHoursArray()
+
                 hourAdapter.notifyDataSetChanged()
             } else {
                 println("the name or hour in the selectedOptions were empty, ${viewModel.selectedOptions}")

@@ -22,28 +22,14 @@ class UserBookingViewModel : ViewModel() {
 
     fun updateSelectedItems(item: Any, onError: () -> Unit, onDelete: () -> Unit) {
         if (selectedOptions.size <= 3) {
-            if (item is Professional) {
-                if (selectedOptions.contains(item::class)) {
+            // Check if the item is a Professional or Hour or Days
+            if (item is Professional || item is Hour || item is Days) {
+                val itemClass = item::class.java
+                val isItemAlreadySelected = selectedOptions.any { it.javaClass == itemClass }
+
+                if (isItemAlreadySelected) {
                     onDelete()
-                    selectedOptions.remove(item::class)
-                    println("selectedOptions by deleted: $selectedOptions")
-                } else {
-                    selectedOptions.add(item)
-                    println("selectedOptions by added: $selectedOptions")
-                }
-            } else if (item is Hour && selectedOptions.contains(Professional::class)) {
-                if (selectedOptions.contains(item::class)) {
-                    onDelete()
-                    selectedOptions.remove(item::class)
-                    println("selectedOptions by deleted: $selectedOptions")
-                } else {
-                    selectedOptions.add(item)
-                    println("selectedOptions by added: $selectedOptions")
-                }
-            } else if (item is Days && selectedOptions.contains(Professional::class)) {
-                if (selectedOptions.contains(item.javaClass)) {
-                    onDelete()
-                    selectedOptions.remove(item.javaClass)
+                    selectedOptions.removeAll { it.javaClass == itemClass }
                     println("selectedOptions by deleted: $selectedOptions")
                 } else {
                     selectedOptions.add(item)
@@ -69,6 +55,12 @@ class UserBookingViewModel : ViewModel() {
         Repository.getHours(name) {
             _hours.value = Repository.hoursList
         }
+    }
+
+    fun resetHoursArray() {
+        _hours.value = mutableListOf()
+
+        Repository.hoursList.clear()
     }
 
     fun loadProfessionals() {

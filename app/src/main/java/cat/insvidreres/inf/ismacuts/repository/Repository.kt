@@ -11,6 +11,7 @@ import cat.insvidreres.inf.ismacuts.model.Professional
 import cat.insvidreres.inf.ismacuts.model.User
 import cat.insvidreres.inf.ismacuts.users.booking.Days
 import cat.insvidreres.inf.ismacuts.users.booking.Hour
+import cat.insvidreres.inf.ismacuts.users.home.Service
 import cat.insvidreres.inf.ismacuts.utils.ErrorHandler
 import com.google.firebase.Firebase
 import com.google.firebase.auth.AuthCredential
@@ -45,7 +46,7 @@ class Repository : ErrorHandler {
         var daysList = mutableListOf<Days>()
         var hoursList = mutableListOf<Hour>()
         var professionalList = mutableListOf<Professional>()
-
+        var servicesList = mutableListOf<Service>()
 
         fun insertUser(user: User) {
             user.password = encryptPassword(user.password)
@@ -166,6 +167,8 @@ class Repository : ErrorHandler {
                             professional.data["reviews"] as MutableList<Number>,
                             professional.data["services"] as MutableList<String>,
                             appHourArray,
+                            professional.data["updatedTime"] as Number,
+                            "",
                             professional.data["img"].toString(),
                         )
                         professionalList.add(pro)
@@ -317,6 +320,29 @@ class Repository : ErrorHandler {
                     println("Error fetching hours data: $e")
                 }
             }
+        }
+        //TODO make services rv work
+        fun getServices(onComplete: () -> Unit) {
+            val db = Firebase.firestore
+            servicesList.clear()
+
+            db.collection("services")
+                .document("always")
+                .get()
+                .addOnSuccessListener { doc ->
+                    val services = doc.data?.get("services") as MutableList<String>
+                    services.sort()
+                    for (service in services) {
+                        servicesList.add(
+                            Service(
+                                service,
+                                service.lowercase(Locale.ROOT).replace(" ", "_")
+                            ))
+                    }
+
+                    onComplete()
+                    println(servicesList)
+                }
         }
 
         //TODO Make fun that resets all professionals appointments array in firebase after a new day

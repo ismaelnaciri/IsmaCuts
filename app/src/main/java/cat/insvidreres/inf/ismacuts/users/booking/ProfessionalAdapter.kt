@@ -24,7 +24,6 @@ class ProfessionalAdapter(
             var clicked = false
             binding.professionalNameTV.text = professional.name
 
-            //TODO ratingbar rating is average of all reviews from professional
             var ratingAverage = 0.0
             for (rating in professional.reviews) {
                 ratingAverage += rating.toFloat()
