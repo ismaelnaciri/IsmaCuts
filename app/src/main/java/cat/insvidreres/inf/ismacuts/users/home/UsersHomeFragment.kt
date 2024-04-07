@@ -31,6 +31,12 @@ class UsersHomeFragment : Fragment() {
             LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
 
         val serviceAdapter = ServiceAdapter(requireContext(), emptyList()) { selectedService ->
+            Toast.makeText(
+                requireContext(),
+                "Professional Selected: " + selectedService.name,
+                Toast.LENGTH_LONG
+            ).show()
+
             viewModel.updateSelectedItems(selectedService,
                 onError = {
                     Toast.makeText(
