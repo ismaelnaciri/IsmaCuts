@@ -11,6 +11,7 @@ import cat.insvidreres.inf.ismacuts.model.Professional
 import cat.insvidreres.inf.ismacuts.model.User
 import cat.insvidreres.inf.ismacuts.users.booking.Days
 import cat.insvidreres.inf.ismacuts.users.booking.Hour
+import cat.insvidreres.inf.ismacuts.users.home.Product
 import cat.insvidreres.inf.ismacuts.users.home.Service
 import cat.insvidreres.inf.ismacuts.utils.ErrorHandler
 import com.google.firebase.Firebase
@@ -47,6 +48,7 @@ class Repository : ErrorHandler {
         var hoursList = mutableListOf<Hour>()
         var professionalList = mutableListOf<Professional>()
         var servicesList = mutableListOf<Service>()
+        var productsList = mutableListOf<Product>()
 
         fun insertUser(user: User) {
             user.password = encryptPassword(user.password)
@@ -321,28 +323,71 @@ class Repository : ErrorHandler {
                 }
             }
         }
-        //TODO make services rv work
+
+        fun getProducts(serviceType: String, onComplete: () -> Unit) {
+            val db = Firebase.firestore
+            productsList.clear()
+
+            if (serviceType.isEmpty()) {
+                db.collection("services")
+                    .document("always")
+                    .get()
+                    .addOnSuccessListener {
+                        val products = it.data?.get("services") as MutableList<Map<String, Any>>
+                        for (service in products) {
+                            productsList.add(Product(
+                                service["name"].toString(),
+                                service["img"].toString(),
+                                service["serviceType"].toString(),
+                            ))
+                        }
+                    }
+            } else {
+                db.collection("services")
+                    .document("always")
+                    .get()
+                    .addOnSuccessListener {
+                        val products = it.data?.get("services") as MutableList<Map<String, Any>>
+                        if (products != null) {
+                            for (service in products) {
+                                if (service["serviceType"].toString() === serviceType) {
+                                    productsList.add(Product(
+                                        service["name"].toString(),
+                                        service["img"].toString(),
+                                        service["serviceType"].toString(),
+                                    ))
+                                }
+                            }
+                        }
+                    }
+            }
+        }
+
         fun getServices(onComplete: () -> Unit) {
             val db = Firebase.firestore
             servicesList.clear()
 
-            db.collection("services")
-                .document("always")
-                .get()
-                .addOnSuccessListener { doc ->
-                    val services = doc.data?.get("services") as MutableList<String>
-                    services.sort()
-                    for (service in services) {
-                        servicesList.add(
-                            Service(
-                                service,
-                                service.lowercase(Locale.ROOT).replace(" ", "_")
-                            ))
-                    }
+            GlobalScope.launch(Dispatchers.Main) {
+                db.collection("services")
+                    .document("always")
+                    .get()
+                    .addOnSuccessListener {
+                        val services = it.data?.get("services") as MutableList<Map<String, Any>>
 
-                    onComplete()
-                    println(servicesList)
-                }
+                        for (service in services) {
+                            servicesList.add(
+                                Service(
+                                    service["name"].toString(),
+                                    service["img"].toString().lowercase(Locale.ROOT).replace(" ", "_"),
+                                    service["serviceType"].toString()
+                                )
+                            )
+                        }
+
+                        onComplete()
+                        println(servicesList)
+                    }
+            }
         }
 
         //TODO Make fun that resets all professionals appointments array in firebase after a new day

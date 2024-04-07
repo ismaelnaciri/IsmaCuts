@@ -12,7 +12,7 @@ class ProductAdapter(val context: Context, var dataset: List<Product>, val itemO
         inner class ProductViewHolder(var binding: ProductBinding)
             : RecyclerView.ViewHolder(binding.root) {
                 fun bind(product: Product) {
-
+                    //TODO put the url into the image
                 }
         }
 

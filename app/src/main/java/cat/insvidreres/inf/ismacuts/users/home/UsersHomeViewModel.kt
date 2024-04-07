@@ -10,7 +10,8 @@ class UsersHomeViewModel : ViewModel() {
     private var _services = MutableLiveData<MutableList<Service>>()
     val services : LiveData<MutableList<Service>> = _services
 
-
+    private var _products = MutableLiveData<MutableList<Product>>()
+    val product : LiveData<MutableList<Product>> = _products
 
     var selectedOptions: MutableList<Any> = mutableListOf()
 
@@ -41,6 +42,14 @@ class UsersHomeViewModel : ViewModel() {
 
         Repository.getServices {
             _services.value = Repository.servicesList
+        }
+    }
+
+    fun loadProducts(serviceType: String) {
+        _products.value = mutableListOf()
+
+        Repository.getProducts(serviceType) {
+            _products.value = Repository.productsList
         }
     }
 
