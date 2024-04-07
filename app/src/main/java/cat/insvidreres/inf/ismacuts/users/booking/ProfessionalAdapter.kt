@@ -3,10 +3,12 @@ package cat.insvidreres.inf.ismacuts.users.booking
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import cat.insvidreres.inf.ismacuts.databinding.ProfessionalBinding
 import cat.insvidreres.inf.ismacuts.model.Professional
 import com.bumptech.glide.Glide
+import cat.insvidreres.inf.ismacuts.R
+import cat.insvidreres.inf.ismacuts.databinding.ProfessionalBinding
 
 class ProfessionalAdapter(
     val context: Context,
@@ -20,10 +22,14 @@ class ProfessionalAdapter(
 
         fun bind(professional: Professional) {
             var clicked = false
-            var ratingAverage = 4.00
             binding.professionalNameTV.text = professional.name
 
             //TODO ratingbar rating is average of all reviews from professional
+            var ratingAverage = 0.0
+            for (rating in professional.reviews) {
+                ratingAverage += rating.toFloat()
+            }
+            ratingAverage /= professional.reviews.size
             binding.professionalRatingBar.rating = ratingAverage.toFloat()
 
             Glide.with(binding.professionalImageView.context).load(professional.img).into(binding.professionalImageView)
@@ -31,9 +37,9 @@ class ProfessionalAdapter(
             binding.root.setOnClickListener {
                 clicked = !clicked
                 if (clicked)
-                    //TODO change background
+                    binding.proffessionalBackgroudLayout.background = ContextCompat.getDrawable(context, R.drawable.booking_selected_item_corner_background)
                 else
-                    //TODO normal background
+                    binding.proffessionalBackgroudLayout.background = ContextCompat.getDrawable(context, R.drawable.professional_rounded_background)
 
                 itemOnClickListener.invoke(professional)
             }

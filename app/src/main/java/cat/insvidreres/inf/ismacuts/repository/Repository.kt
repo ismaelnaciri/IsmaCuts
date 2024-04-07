@@ -28,6 +28,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.security.MessageDigest
 import java.text.SimpleDateFormat
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 import java.util.Base64
 import java.util.Calendar
 import java.util.Date
@@ -68,8 +70,7 @@ class Repository : ErrorHandler {
             Log.d("User fields test", "email | ${user.email}  |  password ${user.password}")
         }
 
-        //TODO
-        //Change so that it kn ows if email is admin
+        //TODO Change so that it kn ows if email is admin
         fun signIn(email: String, password: String): Boolean {
             try {
                 FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
@@ -125,7 +126,6 @@ class Repository : ErrorHandler {
                             i.data["email"].toString(),
                             i.data["password"].toString(),
                             i.data["admin"].toString().toBoolean(),
-                            //TODO get appointments array and
                             "",
                             i.data["img"].toString()
                         )
@@ -140,20 +140,32 @@ class Repository : ErrorHandler {
                 }
         }
 
+        //Get professionals and their hours available
         fun getProfesionals(service: String, onComplete: () -> Unit) {
             val db = Firebase.firestore
+
+            professionalList.clear()
 
             db.collection("professionals")
                 .whereArrayContains("services", service)
                 .get()
                 .addOnSuccessListener {
                     for (professional in it) {
+                        var appHourArray = mutableListOf<Hour>()
+                        val appointmentArrayString =
+                            professional.data["appointments"] as MutableList<String>
+
+                        for (hour in appointmentArrayString) {
+                            appHourArray.add(Hour(hour))
+                        }
+
                         val pro = Professional(
                             professional.data["name"].toString(),
                             professional.data["email"].toString(),
                             professional.data["password"].toString(),
-                            professional.data["reviews"] as List<Number>,
-                            professional.data["services"] as List<String>,
+                            professional.data["reviews"] as MutableList<Number>,
+                            professional.data["services"] as MutableList<String>,
+                            appHourArray,
                             professional.data["img"].toString(),
                         )
                         professionalList.add(pro)
@@ -162,8 +174,93 @@ class Repository : ErrorHandler {
 
                     onComplete()
                 }
+                .addOnFailureListener {
+                    println("Error getting the professionals!!! $it")
+                }
         }
 
+        fun updateProfessionalAvailableHours(
+            name: String,
+            valueToDelete: String,
+            onComplete: () -> Unit
+        ) {
+            val db = Firebase.firestore
+
+            GlobalScope.launch(Dispatchers.Main) {
+                db.collection("professionals")
+                    .whereEqualTo("name", name)
+                    .get()
+                    .addOnSuccessListener {
+                        for (professional in it) {
+                            val array = professional.data["appointments"] as MutableList<String>
+                            array.remove(valueToDelete)
+
+                            db.collection("professionals")
+                                .document(professional.id)
+                                .update("appointments", array)
+                                .addOnSuccessListener {
+
+                                    hoursList.remove(Hour(valueToDelete))
+                                    onComplete()
+                                    println("Professional ${professional.data["name"]} hours updated")
+                                }.addOnFailureListener {
+                                    println("ERROR Updating the values  |  $it")
+                                }
+                        }
+                    }.addOnFailureListener {
+                        println("Error getting the document  |  $it")
+                    }
+            }
+
+        }
+
+        fun resetAllProfessionalsHours(onComplete: () -> Unit) {
+            val db = Firebase.firestore
+
+            GlobalScope.launch(Dispatchers.IO) {
+                val currentTime = Calendar.getInstance().timeInMillis
+                val dayStartTime = getDayStartTime(currentTime)
+
+                db.collection("professionals")
+                    .get()
+                    .addOnSuccessListener { querySnapshot ->
+                        var hoursReset = mutableListOf<Hour>()
+                        getHours {
+                            hoursReset = hoursList
+                            hoursList.clear()
+                        }
+                        for (professional in querySnapshot) {
+                            // Check if it's a new day since the last update
+                            val updatedTime = professional.getString("updatedTime")?.toLong() ?: 0
+                            if (updatedTime < dayStartTime && updatedTime.toInt() != 0) {
+                                professional.data["appointments"] = hoursReset
+
+                                db.collection("professionals")
+                                    .document(professional.id)
+                                    .update(
+                                        "appointments", hoursReset,
+                                        "updatedTime", currentTime
+                                    )
+                            } else {
+                                println("professional ${professional.data["name"]} has already been updated")
+                            }
+                        }
+                        onComplete()
+                    }
+            }
+        }
+
+        fun getDayStartTime(timestamp: Long): Long {
+            val calendar = Calendar.getInstance()
+            calendar.timeInMillis = timestamp
+            calendar.set(Calendar.HOUR_OF_DAY, 0)
+            calendar.set(Calendar.MINUTE, 0)
+            calendar.set(Calendar.SECOND, 0)
+            calendar.set(Calendar.MILLISECOND, 0)
+            return calendar.timeInMillis
+        }
+
+        //Helper fun to resetAllProfessionalHours
         fun getHours(onComplete: () -> Unit) {
             val db = Firebase.firestore
             hoursList.clear()
@@ -189,21 +286,58 @@ class Repository : ErrorHandler {
             }
         }
 
+        fun getHours(name: String, onComplete: () -> Unit) {
+            val db = Firebase.firestore
+            hoursList.clear()
+
+            GlobalScope.launch(Dispatchers.Main) {
+                try {
+                    db.collection("professionals")
+                        .whereEqualTo("name", name)
+                        .get()
+                        .addOnSuccessListener { list ->
+                            for (professional in list) {
+                                val hours = professional.data["appointments"] as MutableList<String>
+                                if (hours != null) {
+                                    hours.sort()
+
+                                    for (i in hours) {
+                                        hoursList.add(Hour(i))
+                                    }
+                                    onComplete()
+                                    println("Hours list: $hoursList for $name")
+                                } else {
+                                    println("No hours data found")
+                                }
+                            }
+                        }
+                    onComplete()
+
+                } catch (e: Exception) {
+                    println("Error fetching hours data: $e")
+                }
+            }
+        }
+
+        //TODO Make fun that resets all professionals appointments array in firebase after a new day
+        //TODO update signIn method so that it detects somehow when to insert into users and when into professionals
+
         fun getDays(onComplete: () -> Unit) {
             daysList.clear()
 
             GlobalScope.launch(Dispatchers.Main) {
                 val currentYear = Calendar.getInstance().get(Calendar.YEAR)
-                val currentMonth = Calendar.getInstance().get(Calendar.MONTH) + 1 // Months are 0-indexed in Calendar
+                val currentMonth = Calendar.getInstance()
+                    .get(Calendar.MONTH) + 1 // Months are 0-indexed in Calendar
 
                 val yearData = getDatesFromFirestore(currentYear)
-                print("YEAR DATA: $yearData")
 
                 if (yearData != null) {
                     val currentMonthData = yearData.filter {
                         val month = it["month"] as String
                         val monthCalendar = Calendar.getInstance()
-                        monthCalendar.time = SimpleDateFormat("MMMM", Locale.ENGLISH).parse(month) ?: Date()
+                        monthCalendar.time =
+                            SimpleDateFormat("MMMM", Locale.ENGLISH).parse(month) ?: Date()
 
                         monthCalendar.get(Calendar.MONTH) + 1 == currentMonth
                     }
@@ -406,7 +540,10 @@ class Repository : ErrorHandler {
             val firestore = Firebase.firestore
             return try {
                 val querySnapshot = firestore.collection("days")
-                    .orderBy(com.google.firebase.firestore.FieldPath.documentId(), Query.Direction.DESCENDING)
+                    .orderBy(
+                        com.google.firebase.firestore.FieldPath.documentId(),
+                        Query.Direction.DESCENDING
+                    )
                     .limit(1)
                     .get()
                     .await()
@@ -479,14 +616,17 @@ class Repository : ErrorHandler {
                     .get()
                     .await()
 
-                val data = documentSnapshot.data?.get("data") as? List<Map<String, Any>> ?: emptyList()
+                val data =
+                    documentSnapshot.data?.get("data") as? List<Map<String, Any>> ?: emptyList()
 
                 data.flatMap { monthData ->
                     val month = monthData["month"] as? String ?: ""
                     val days = monthData["days"] as? List<Map<String, Any>> ?: emptyList()
                     days.map { day ->
-                        val dayNumber = day["dayNumber"] as? Number ?: -1 // Default value or handle appropriately
-                        val dayName = day["dayName"] as? String ?: "" // Default value or handle appropriately
+                        val dayNumber = day["dayNumber"] as? Number
+                            ?: -1 // Default value or handle appropriately
+                        val dayName =
+                            day["dayName"] as? String ?: "" // Default value or handle appropriately
                         mapOf(
                             "month" to month,
                             "dayNumber" to dayNumber,
@@ -499,7 +639,6 @@ class Repository : ErrorHandler {
                 emptyList()
             }
         }
-
 
 
     }

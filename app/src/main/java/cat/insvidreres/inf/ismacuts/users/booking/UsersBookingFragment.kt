@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import cat.insvidreres.inf.ismacuts.R
 import cat.insvidreres.inf.ismacuts.databinding.FragmentUsersBookingBinding
+import cat.insvidreres.inf.ismacuts.model.Professional
 
 
 class UsersBookingFragment : Fragment() {
@@ -29,18 +30,30 @@ class UsersBookingFragment : Fragment() {
         val hoursRecyclerView = binding.availableHoursRecyclerView
         val professionalsRecyclerView = binding.professionalsBookingRV
 
-        dayRecyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-        hoursRecyclerView.layoutManager = GridLayoutManager(context, 3, GridLayoutManager.VERTICAL, false)
-        professionalsRecyclerView.layoutManager = LinearLayoutManager(context, GridLayoutManager.VERTICAL, false)
+        dayRecyclerView.layoutManager =
+            LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        hoursRecyclerView.layoutManager =
+            GridLayoutManager(context, 3, GridLayoutManager.VERTICAL, false)
+        professionalsRecyclerView.layoutManager =
+            LinearLayoutManager(context, GridLayoutManager.VERTICAL, false)
 
-        val dayAdapter = DaysAdapter(requireContext(), emptyList()) {selectedDay ->
-            Toast.makeText(
-                requireContext(),
-                "Day selected " + selectedDay.day + " " + selectedDay.dayOfWeek,
-                Toast.LENGTH_LONG
-            ).show()
+        val dayAdapter = DaysAdapter(requireContext(), emptyList()) { selectedDay ->
 
-
+            viewModel.updateSelectedItems(selectedDay,
+                onError = {
+                    Toast.makeText(
+                        requireContext(),
+                        "selectedOptions size: ${viewModel.selectedOptions.size}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                },
+                onDelete = {
+                    Toast.makeText(
+                        requireContext(),
+                        "Deleted item: $selectedDay",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                })
         }
 
         val hourAdapter = HourAdapter(requireContext(), emptyList()) { selectedHour ->
@@ -49,6 +62,22 @@ class UsersBookingFragment : Fragment() {
                 "Hour selected " + selectedHour.hour,
                 Toast.LENGTH_SHORT
             ).show()
+
+            viewModel.updateSelectedItems(selectedHour,
+                onError = {
+                    Toast.makeText(
+                        requireContext(),
+                        "Error wtf",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                },
+                onDelete = {
+                    Toast.makeText(
+                        requireContext(),
+                        "Deleted item: $selectedHour",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                })
         }
 
         val professionalAdapter = ProfessionalAdapter(requireContext(), emptyList()) { selectedProfessional ->
@@ -57,10 +86,28 @@ class UsersBookingFragment : Fragment() {
                 "Professional Selected: " + selectedProfessional.name,
                 Toast.LENGTH_LONG
             ).show()
-        }
+
+            viewModel.updateSelectedItems(selectedProfessional,
+                onError = {
+                    Toast.makeText(
+                        requireContext(),
+                        "Error wtf",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                },
+                onDelete = {
+                    Toast.makeText(
+                        requireContext(),
+                        "Deleted item: $selectedProfessional",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                })
+
+            viewModel.loadHours(selectedProfessional.name)
+            hourAdapter.notifyDataSetChanged()
+            }
 
         viewModel.loadDays()
-        viewModel.loadHours()
         viewModel.loadProfessionals()
 
         viewModel.days.observe(viewLifecycleOwner) { daysList ->
@@ -76,6 +123,48 @@ class UsersBookingFragment : Fragment() {
         viewModel.professionals.observe(viewLifecycleOwner) { professionalList ->
             professionalAdapter.dataset = professionalList
             binding.professionalsBookingRV.adapter = professionalAdapter
+        }
+
+        binding.confirmBookingButton.setOnClickListener {
+            Toast.makeText(
+                requireContext(),
+                "selected items: ${viewModel.selectedOptions}",
+                Toast.LENGTH_LONG
+            ).show()
+
+            println("selected items: ${viewModel.selectedOptions}")
+
+            var name = ""
+            var hour = ""
+
+            for (item in viewModel.selectedOptions) {
+
+                when (item) {
+                    is Professional -> {
+                        name = item.name
+                    }
+
+                    is Hour -> {
+                        hour = item.hour
+                    }
+
+                    else -> {
+                        Toast.makeText(
+                            requireContext(),
+                            "Bug gg wtf",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            }
+
+            if (name != "" && hour != "" && viewModel.selectedOptions.size == 3) {
+                viewModel.removeHourFromProfessional(name, hour)
+                viewModel.selectedOptions.clear()
+                hourAdapter.notifyDataSetChanged()
+            } else {
+                println("the name or hour in the selectedOptions were empty, ${viewModel.selectedOptions}")
+            }
         }
 
         return binding.root
