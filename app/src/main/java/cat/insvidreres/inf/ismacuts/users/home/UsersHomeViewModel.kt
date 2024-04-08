@@ -41,7 +41,7 @@ class UsersHomeViewModel : ViewModel() {
     }
 
     fun loadServices() {
-        _services.value = mutableListOf()
+        _services.value?.clear()
 
         Repository.getServices {
             _services.value = Repository.servicesList
@@ -49,10 +49,11 @@ class UsersHomeViewModel : ViewModel() {
     }
 
     fun loadProducts(serviceType: String) {
-        _products.value = mutableListOf()
+        _products.value?.clear()
 
         Repository.getProducts(serviceType) {
             _products.value = Repository.productsList
+            println("very sussy indeed")
         }
     }
 

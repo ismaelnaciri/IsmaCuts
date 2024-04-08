@@ -2,6 +2,7 @@ package cat.insvidreres.inf.ismacuts.users
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI.setupWithNavController
@@ -17,6 +18,18 @@ class UsersMainActivity : AppCompatActivity() {
         binding = ActivityUsersMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        val userEmail = intent.getStringExtra("userEmail")
+
+        val bookingSVM = ViewModelProvider(this)[HomeBookingSharedViewModel::class.java]
+        if (userEmail != null) {
+            bookingSVM.updateSelectedItems(userEmail,
+                onError = {
+                    print("professional fuck gg item")
+                },
+                onDelete = {
+                    print("${userEmail} deleted from updateSelectedItems")
+                })
+        }
         val navHostFragment = supportFragmentManager.findFragmentById(binding.fragmentContainerViewTag.id) as NavHostFragment
         navController = navHostFragment.navController
 

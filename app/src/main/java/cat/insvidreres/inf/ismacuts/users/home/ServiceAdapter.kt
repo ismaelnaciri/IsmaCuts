@@ -30,9 +30,9 @@ class ServiceAdapter(val context: Context, var dataset: List<Service>, val itemO
                         else {
                             binding.mainServiceLayout.background = ContextCompat.getDrawable(context, R.drawable.main_gradient)
                         }
-                    }
 
-                    itemOnClickListener.invoke(service)
+                        itemOnClickListener.invoke(service)
+                    }
                 }
             }
 

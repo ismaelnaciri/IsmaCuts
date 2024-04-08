@@ -7,9 +7,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import cat.insvidreres.inf.ismacuts.R
 import cat.insvidreres.inf.ismacuts.databinding.FragmentUsersHomeBinding
+import cat.insvidreres.inf.ismacuts.users.HomeBookingSharedViewModel
 
 
 class UsersHomeFragment : Fragment() {
@@ -25,6 +27,8 @@ class UsersHomeFragment : Fragment() {
         val servicesRecyclerView = binding.horizontalServicesRV
         val productsRecyclerView = binding.usersHomeProductsRV
 
+        val bookingSVM = ViewModelProvider(requireActivity())[HomeBookingSharedViewModel::class.java]
+
         servicesRecyclerView.layoutManager =
             LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         productsRecyclerView.layoutManager =
@@ -35,7 +39,19 @@ class UsersHomeFragment : Fragment() {
         viewModel.loadProducts("")
 
         val productsAdapter = ProductAdapter(requireContext(), emptyList()) { selectedProduct ->
-            //TODO Save service selected into a sharedviewmodel
+            Toast.makeText(
+                requireContext(),
+                "Product Selected: " + selectedProduct.name,
+                Toast.LENGTH_LONG
+            ).show()
+
+            bookingSVM.updateSelectedItems(selectedProduct.name,
+                onError = {
+                    print("product fuck gg item")
+                },
+                onDelete = {
+                    print("${selectedProduct.name} deleted from updateSelectedItems")
+                })
         }
 
         val serviceAdapter = ServiceAdapter(requireContext(), emptyList()) { selectedService ->
@@ -47,18 +63,9 @@ class UsersHomeFragment : Fragment() {
 
             viewModel.updateSelectedItems(selectedService,
                 onError = {
-                    Toast.makeText(
-                        requireContext(),
-                        "Error wtf",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    print("Error wtf")
                 },
                 onDelete = {
-                    Toast.makeText(
-                        requireContext(),
-                        "Deleted item: $selectedService",
-                        Toast.LENGTH_SHORT
-                    ).show()
                     println("Deleted item: $selectedService")
                 })
 
@@ -70,11 +77,13 @@ class UsersHomeFragment : Fragment() {
         viewModel.services.observe(viewLifecycleOwner) { servicesList ->
             serviceAdapter.dataset = servicesList
             binding.horizontalServicesRV.adapter = serviceAdapter
+            serviceAdapter.notifyDataSetChanged()
         }
 
         viewModel.products.observe(viewLifecycleOwner) { productsList ->
             productsAdapter.dataset = productsList
             binding.usersHomeProductsRV.adapter = productsAdapter
+            productsAdapter.notifyDataSetChanged()
         }
 
         return binding.root

@@ -17,6 +17,7 @@ import cat.insvidreres.inf.ismacuts.login.LoginActivity
 import cat.insvidreres.inf.ismacuts.model.User
 import cat.insvidreres.inf.ismacuts.recycler.RecyclerActivity
 import cat.insvidreres.inf.ismacuts.utils.ErrorHandler
+import com.bumptech.glide.Glide
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -45,6 +46,10 @@ class RegisterActivity : AppCompatActivity(), ErrorHandler {
         super.onCreate(savedInstanceState)
         binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        Glide.with(binding.registerLogoIV.context).
+        load("https://firebasestorage.googleapis.com/v0/b/ismacuts-a6d41.appspot.com/o/Images%2Fbarber_logo-removebg-preview.png?alt=media&token=20d7ae70-c3b9-4b81-958f-63a24c154464")
+            .into(binding.registerLogoIV)
 
         binding.registerPageSignUpButton.setOnClickListener {
             if (binding.registerUsernameET.text.toString() !== ""

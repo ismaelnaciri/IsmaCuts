@@ -7,11 +7,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import cat.insvidreres.inf.ismacuts.R
 import cat.insvidreres.inf.ismacuts.databinding.FragmentUsersBookingBinding
 import cat.insvidreres.inf.ismacuts.model.Professional
+import cat.insvidreres.inf.ismacuts.users.HomeBookingSharedViewModel
 
 
 class UsersBookingFragment : Fragment() {
@@ -29,6 +31,8 @@ class UsersBookingFragment : Fragment() {
         val dayRecyclerView = binding.bookingDaysRecyclerView
         val hoursRecyclerView = binding.availableHoursRecyclerView
         val professionalsRecyclerView = binding.professionalsBookingRV
+
+        val bookingSVM = ViewModelProvider(requireActivity())[HomeBookingSharedViewModel::class.java]
 
         dayRecyclerView.layoutManager =
             LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
@@ -54,6 +58,14 @@ class UsersBookingFragment : Fragment() {
                         Toast.LENGTH_SHORT
                     ).show()
                 })
+
+            bookingSVM.updateSelectedItems(selectedDay,
+                onError = {
+                    print("day fuck gg item")
+                },
+                onDelete = {
+                    print("${selectedDay} deleted from updateSelectedItems")
+                })
         }
 
         val hourAdapter = HourAdapter(requireContext(), emptyList()) { selectedHour ->
@@ -77,6 +89,14 @@ class UsersBookingFragment : Fragment() {
                         "Deleted item: $selectedHour",
                         Toast.LENGTH_SHORT
                     ).show()
+                })
+
+            bookingSVM.updateSelectedItems(selectedHour,
+                onError = {
+                    print("hour fuck gg item")
+                },
+                onDelete = {
+                    print("${selectedHour} deleted from updateSelectedItems")
                 })
         }
 
@@ -102,6 +122,14 @@ class UsersBookingFragment : Fragment() {
                             "Deleted item: $selectedProfessional",
                             Toast.LENGTH_SHORT
                         ).show()
+                    })
+
+                bookingSVM.updateSelectedItems(selectedProfessional.email,
+                    onError = {
+                        print("professional fuck gg item")
+                    },
+                    onDelete = {
+                        print("${selectedProfessional.email} deleted from updateSelectedItems")
                     })
 
                 if (viewModel.selectedOptions.any { it is Professional }) {
@@ -160,6 +188,11 @@ class UsersBookingFragment : Fragment() {
                 viewModel.removeHourFromProfessional(name, hour)
                 viewModel.selectedOptions.clear()
                 viewModel.resetHoursArray()
+
+                if (bookingSVM.checkIfAnyItemNull()) {
+                    bookingSVM.generateBookingInsert()
+                    bookingSVM.insertBooking()
+                }
 
                 hourAdapter.notifyDataSetChanged()
             } else {

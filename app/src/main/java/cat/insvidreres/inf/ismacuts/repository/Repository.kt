@@ -9,6 +9,7 @@ import cat.insvidreres.inf.ismacuts.model.Beardtrim
 import cat.insvidreres.inf.ismacuts.model.Haircut
 import cat.insvidreres.inf.ismacuts.model.Professional
 import cat.insvidreres.inf.ismacuts.model.User
+import cat.insvidreres.inf.ismacuts.users.Booking
 import cat.insvidreres.inf.ismacuts.users.booking.Days
 import cat.insvidreres.inf.ismacuts.users.booking.Hour
 import cat.insvidreres.inf.ismacuts.users.home.Product
@@ -48,6 +49,7 @@ class Repository : ErrorHandler {
         var professionalList = mutableListOf<Professional>()
         var servicesList = mutableListOf<Service>()
         var productsList = mutableListOf<Product>()
+        var bookngsList = mutableListOf<Booking>()
 
         fun insertUser(user: User) {
             user.password = encryptPassword(user.password)
@@ -84,14 +86,6 @@ class Repository : ErrorHandler {
                 return false
             }
             return true
-        }
-
-        fun insertHaircut(context: Context, haircut: Haircut) {
-
-        }
-
-        fun insertBeardtrim(context: Context, beardtrim: Beardtrim) {
-
         }
 
         private fun addItemToCollection(collection: String, item: Any, docName: String = "") {
@@ -393,6 +387,17 @@ class Repository : ErrorHandler {
             }
         }
 
+        fun insertBooking(booking: Booking, onComplete: () -> Unit,  onError: (error: String) -> Unit) {
+            val db = Firebase.firestore
+
+            db.collection("bookings")
+
+        }
+
+        //TODO Make getBookings for admin, needs a professional name
+        fun getBookings(professionalName: String, onComplete: () -> Unit) {
+
+        }
         //TODO Make fun that resets all professionals appointments array in firebase after a new day
         //TODO update signIn method so that it detects somehow when to insert into users and when into professionals
 
