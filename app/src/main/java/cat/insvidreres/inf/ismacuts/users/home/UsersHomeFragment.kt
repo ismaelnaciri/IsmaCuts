@@ -6,8 +6,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import cat.insvidreres.inf.ismacuts.R
 import cat.insvidreres.inf.ismacuts.databinding.FragmentUsersHomeBinding
@@ -18,6 +20,7 @@ class UsersHomeFragment : Fragment() {
 
     private lateinit var binding: FragmentUsersHomeBinding
     private val viewModel: UsersHomeViewModel by viewModels()
+    private val bookingSharedViewModel: HomeBookingSharedViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -26,8 +29,6 @@ class UsersHomeFragment : Fragment() {
         binding = FragmentUsersHomeBinding.inflate(inflater)
         val servicesRecyclerView = binding.horizontalServicesRV
         val productsRecyclerView = binding.usersHomeProductsRV
-
-        val bookingSVM = ViewModelProvider(requireActivity())[HomeBookingSharedViewModel::class.java]
 
         servicesRecyclerView.layoutManager =
             LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
@@ -38,21 +39,27 @@ class UsersHomeFragment : Fragment() {
         viewModel.loadServices()
         viewModel.loadProducts("")
 
-        val productsAdapter = ProductAdapter(requireContext(), emptyList()) { selectedProduct ->
-            Toast.makeText(
-                requireContext(),
-                "Product Selected: " + selectedProduct.name,
-                Toast.LENGTH_LONG
-            ).show()
+        val productsAdapter =
+            ProductAdapter(requireContext(), emptyList(),
+                itemOnClickListener = { selectedProduct ->
+                    Toast.makeText(
+                        requireContext(),
+                        "Product Selected: " + selectedProduct.name,
+                        Toast.LENGTH_LONG
+                    ).show()
 
-            bookingSVM.updateSelectedItems(selectedProduct.name,
-                onError = {
-                    print("product fuck gg item")
-                },
-                onDelete = {
-                    print("${selectedProduct.name} deleted from updateSelectedItems")
-                })
-        }
+                    bookingSharedViewModel.updateSelectedItems(selectedProduct,
+                        onError = {
+                            print("product fuck gg item")
+                        },
+                        onDelete = {
+                            print("${selectedProduct.name} deleted from updateSelectedItems")
+                        })
+
+//                    findNavController().navigate(R.id.usersBookingFragment)
+                }
+            )
+
 
         val serviceAdapter = ServiceAdapter(requireContext(), emptyList()) { selectedService ->
             Toast.makeText(

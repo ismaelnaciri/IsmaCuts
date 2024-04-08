@@ -63,10 +63,10 @@ class UserBookingViewModel : ViewModel() {
         Repository.hoursList.clear()
     }
 
-    fun loadProfessionals() {
+    fun loadProfessionals(serviceType: String) {
         _professionals.value = mutableListOf<Professional>()
 
-        Repository.getProfesionals(ServicesType.HAIRCUT.toString()) {
+        Repository.getProfesionals(serviceType) {
             _professionals.value = Repository.professionalList
         }
     }

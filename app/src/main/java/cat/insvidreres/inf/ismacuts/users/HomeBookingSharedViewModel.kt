@@ -23,27 +23,42 @@ class HomeBookingSharedViewModel : ViewModel() {
     fun updateSelectedItems(item: Any, onError: () -> Unit, onDelete: () -> Unit) {
         if (selectedOptions.size <= 5) {
             // Check if the item is User or Product or Professional or Days or Hour
-            if ((item is String && item.contains("@") && selectedOptions.count { it is String && it.contains("@") } < 2)
+            if ((item is String && item.contains("@") && selectedOptions.count { it is String && it.contains("@") } <= 2)
                 || item is Product
                 || item is Days
                 || item is Hour
             ) {
-                val itemClass = item::class.java
-                val isItemAlreadySelected = selectedOptions.any { it.javaClass == itemClass }
-
-                if (isItemAlreadySelected) {
-                    onDelete()
-                    selectedOptions.removeAll { it.javaClass == itemClass }
-                    println("selectedOptions by deleted: $selectedOptions")
+                if (item is String && item.contains("@")) {
+                    val emailCount = selectedOptions.filterIsInstance<String>().count { it.contains("@") }
+                    if (emailCount < 2) {
+                        selectedOptions.add(item)
+                        println("selectedOptions by added: $selectedOptions")
+                    } else {
+                        if(selectedOptions.any { it.toString() == item })
+                            selectedOptions.remove(item)
+                    }
                 } else {
-                    selectedOptions.add(item)
-                    println("selectedOptions by added: $selectedOptions")
+                    val itemClass = item::class.java
+                    val isItemAlreadySelected = selectedOptions.any { it.javaClass == itemClass }
+
+                    if (isItemAlreadySelected) {
+                        onDelete()
+                        selectedOptions.removeAll { it.javaClass == itemClass }
+                        println("selectedOptions by deleted: $selectedOptions")
+                    } else {
+                        selectedOptions.add(item)
+                        println("selectedOptions by added: $selectedOptions")
+                    }
                 }
             } else {
                 onError()
             }
         }
+
+        println("All selected items | $selectedOptions")
     }
+
+
 
     fun checkIfAnyItemNull() : Boolean {
         return (_book.value?.userEmail != null

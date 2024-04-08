@@ -1,12 +1,7 @@
 package cat.insvidreres.inf.ismacuts.repository
 
-import android.content.Context
 import android.net.Uri
 import android.util.Log
-import android.widget.Toast
-import androidx.lifecycle.LiveData
-import cat.insvidreres.inf.ismacuts.model.Beardtrim
-import cat.insvidreres.inf.ismacuts.model.Haircut
 import cat.insvidreres.inf.ismacuts.model.Professional
 import cat.insvidreres.inf.ismacuts.model.User
 import cat.insvidreres.inf.ismacuts.users.Booking
@@ -17,10 +12,8 @@ import cat.insvidreres.inf.ismacuts.users.home.Service
 import cat.insvidreres.inf.ismacuts.utils.ErrorHandler
 import com.google.firebase.Firebase
 import com.google.firebase.auth.AuthCredential
-import com.google.firebase.auth.EmailAuthCredential
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.FirebaseStorage
@@ -31,8 +24,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.security.MessageDigest
 import java.text.SimpleDateFormat
-import java.time.LocalTime
-import java.time.format.DateTimeFormatter
 import java.util.Base64
 import java.util.Calendar
 import java.util.Date
@@ -167,7 +158,7 @@ class Repository : ErrorHandler {
                             professional.data["img"].toString(),
                         )
                         professionalList.add(pro)
-                        println("Professionals list: ${professional}")
+                        println("Professionals list: $professionalList")
                     }
 
                     onComplete()
@@ -229,7 +220,7 @@ class Repository : ErrorHandler {
                         }
                         for (professional in querySnapshot) {
                             // Check if it's a new day since the last update
-                            val updatedTime = professional.getString("updatedTime")?.toLong() ?: 0
+                            val updatedTime = professional.get("updatedTime")?.toString()?.toLong() ?: 0
                             if (updatedTime < dayStartTime && updatedTime.toInt() != 0) {
                                 professional.data["appointments"] = hoursReset
 
@@ -390,7 +381,50 @@ class Repository : ErrorHandler {
         fun insertBooking(booking: Booking, onComplete: () -> Unit,  onError: (error: String) -> Unit) {
             val db = Firebase.firestore
 
+            val mapList: MutableList<Map<String, Any>> = mutableListOf()
+
+            val bookMap = mutableMapOf<String, Any>()
+            bookMap["userEmail"] = booking.userEmail
+            bookMap["product"] = booking.product
+            bookMap["professionalEmail"] = booking.professionalEmail
+            bookMap["days"] = booking.days
+            bookMap["hour"] = booking.hour
+
+            mapList.add(bookMap)
+
             db.collection("bookings")
+                .document(booking.professionalEmail)
+                .get()
+                .addOnSuccessListener {
+                    val bookings = it.data?.get("bookings") as MutableList<Map<String, Any>>
+                    bookings.addAll(mapList)
+
+                    val toFirestore = mutableMapOf<String, Any>()
+                    toFirestore["bookings"] = bookings
+
+                    db.collection("bookings")
+                        .document(booking.professionalEmail)
+                        .update(toFirestore)
+                        .addOnSuccessListener {
+                            onComplete()
+                            println("Insert done, the document already EXISTED!!")
+                        }
+                        .addOnFailureListener {
+                            println("Error inserting, whilst the document existed  |  ${it.message}")
+                        }
+                }
+                .addOnFailureListener {
+                    db.collection("bookings")
+                        .document(booking.professionalEmail)
+                        .set(mapList)
+                        .addOnSuccessListener {
+                            onComplete()
+                            println("Inserted correctly. The document dod not exist")
+                        }
+                        .addOnFailureListener {
+                            println("Error inserting, whilst the document dod not exist  |  ${it.message}")
+                        }
+                }
 
         }
 

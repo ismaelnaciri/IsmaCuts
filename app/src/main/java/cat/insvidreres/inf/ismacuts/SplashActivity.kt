@@ -12,6 +12,7 @@ import cat.insvidreres.inf.ismacuts.users.UsersMainActivity
 class SplashActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        startActivity(Intent(this, UsersMainActivity::class.java))
+//        startActivity(Intent(this, UsersMainActivity::class.java))
+        startActivity(Intent(this, MainScreenActivity::class.java))
     }
 }

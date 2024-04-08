@@ -6,20 +6,24 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import cat.insvidreres.inf.ismacuts.R
 import cat.insvidreres.inf.ismacuts.databinding.FragmentUsersBookingBinding
 import cat.insvidreres.inf.ismacuts.model.Professional
 import cat.insvidreres.inf.ismacuts.users.HomeBookingSharedViewModel
+import cat.insvidreres.inf.ismacuts.users.home.Product
 
 
 class UsersBookingFragment : Fragment() {
 
     private lateinit var binding: FragmentUsersBookingBinding
     private val viewModel: UserBookingViewModel by viewModels()
+    private val bookingSharedViewModel: HomeBookingSharedViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -31,8 +35,6 @@ class UsersBookingFragment : Fragment() {
         val dayRecyclerView = binding.bookingDaysRecyclerView
         val hoursRecyclerView = binding.availableHoursRecyclerView
         val professionalsRecyclerView = binding.professionalsBookingRV
-
-        val bookingSVM = ViewModelProvider(requireActivity())[HomeBookingSharedViewModel::class.java]
 
         dayRecyclerView.layoutManager =
             LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
@@ -59,7 +61,8 @@ class UsersBookingFragment : Fragment() {
                     ).show()
                 })
 
-            bookingSVM.updateSelectedItems(selectedDay,
+
+            bookingSharedViewModel.updateSelectedItems(selectedDay,
                 onError = {
                     print("day fuck gg item")
                 },
@@ -91,12 +94,12 @@ class UsersBookingFragment : Fragment() {
                     ).show()
                 })
 
-            bookingSVM.updateSelectedItems(selectedHour,
+            bookingSharedViewModel.updateSelectedItems(selectedHour,
                 onError = {
                     print("hour fuck gg item")
                 },
                 onDelete = {
-                    print("${selectedHour} deleted from updateSelectedItems")
+                    print("${selectedHour.hour} deleted from updateSelectedItems")
                 })
         }
 
@@ -105,10 +108,10 @@ class UsersBookingFragment : Fragment() {
                 Toast.makeText(
                     requireContext(),
                     "Professional Selected: " + selectedProfessional.name,
-                    Toast.LENGTH_LONG
+                    Toast.LENGTH_SHORT
                 ).show()
 
-                viewModel.updateSelectedItems(selectedProfessional,
+                viewModel.updateSelectedItems(selectedProfessional.email,
                     onError = {
                         Toast.makeText(
                             requireContext(),
@@ -124,7 +127,7 @@ class UsersBookingFragment : Fragment() {
                         ).show()
                     })
 
-                bookingSVM.updateSelectedItems(selectedProfessional.email,
+                bookingSharedViewModel.updateSelectedItems(selectedProfessional.email,
                     onError = {
                         print("professional fuck gg item")
                     },
@@ -132,7 +135,7 @@ class UsersBookingFragment : Fragment() {
                         print("${selectedProfessional.email} deleted from updateSelectedItems")
                     })
 
-                if (viewModel.selectedOptions.any { it is Professional }) {
+                if (bookingSharedViewModel.selectedOptions.any { it.toString() == selectedProfessional.email }) {
                     viewModel.loadHours(selectedProfessional.name)
                 } else {
                     viewModel.resetHoursArray()
@@ -141,7 +144,11 @@ class UsersBookingFragment : Fragment() {
             }
 
         viewModel.loadDays()
-        viewModel.loadProfessionals()
+        for (item in bookingSharedViewModel.selectedOptions) {
+            if (item is Product) {
+                viewModel.loadProfessionals(item.serviceType)
+            }
+        }
 
         viewModel.days.observe(viewLifecycleOwner) { daysList ->
             dayAdapter.dataset = daysList
@@ -189,9 +196,9 @@ class UsersBookingFragment : Fragment() {
                 viewModel.selectedOptions.clear()
                 viewModel.resetHoursArray()
 
-                if (bookingSVM.checkIfAnyItemNull()) {
-                    bookingSVM.generateBookingInsert()
-                    bookingSVM.insertBooking()
+                if (bookingSharedViewModel.checkIfAnyItemNull()) {
+                    bookingSharedViewModel.generateBookingInsert()
+                    bookingSharedViewModel.insertBooking()
                 }
 
                 hourAdapter.notifyDataSetChanged()

@@ -2,6 +2,7 @@ package cat.insvidreres.inf.ismacuts.users
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.activity.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
@@ -13,6 +14,8 @@ class UsersMainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityUsersMainBinding
     private lateinit var navController: NavController
 
+    private val bookingSharedViewModel: HomeBookingSharedViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityUsersMainBinding.inflate(layoutInflater)
@@ -20,9 +23,8 @@ class UsersMainActivity : AppCompatActivity() {
 
         val userEmail = intent.getStringExtra("userEmail")
 
-        val bookingSVM = ViewModelProvider(this)[HomeBookingSharedViewModel::class.java]
         if (userEmail != null) {
-            bookingSVM.updateSelectedItems(userEmail,
+            bookingSharedViewModel.updateSelectedItems(userEmail,
                 onError = {
                     print("professional fuck gg item")
                 },
