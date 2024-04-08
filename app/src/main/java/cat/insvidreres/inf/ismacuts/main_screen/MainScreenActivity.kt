@@ -50,23 +50,23 @@ class MainScreenActivity : AppCompatActivity() {
             .into(binding.mainScreenLogoIV)
 
 
-        val currentYear = Calendar.getInstance().get(Calendar.YEAR)
-
-        GlobalScope.launch(Dispatchers.Default) {
-            val lastDocumentYear = Repository.getLastDocumentYear()
-
-            if (lastDocumentYear == null || currentYear > lastDocumentYear) {
-                val daysOfYear = Repository.generateDaysOfYear(currentYear)
-                Repository.saveDaysToFirestore(currentYear, daysOfYear)
-            } else {
-                println("Current year $currentYear is not greater than the last document year $lastDocumentYear in Firestore.")
-            }
-        }
-
-        GlobalScope.launch(Dispatchers.IO) {
-            Repository.resetAllProfessionalsHours {
-                println("Professional hour reset completed!!")
-            }
-        }
+//        val currentYear = Calendar.getInstance().get(Calendar.YEAR)
+//
+//        GlobalScope.launch(Dispatchers.Default) {
+//            val lastDocumentYear = Repository.getLastDocumentYear()
+//
+//            if (lastDocumentYear == null || currentYear > lastDocumentYear) {
+//                val daysOfYear = Repository.generateDaysOfYear(currentYear)
+//                Repository.saveDaysToFirestore(currentYear, daysOfYear)
+//            } else {
+//                println("Current year $currentYear is not greater than the last document year $lastDocumentYear in Firestore.")
+//            }
+//        }
+//
+//        GlobalScope.launch(Dispatchers.IO) {
+//            Repository.resetAllProfessionalsHours {
+//                println("Professional hour reset completed!!")
+//            }
+//        }
     }
 }
