@@ -12,6 +12,7 @@ import cat.insvidreres.inf.ismacuts.users.UsersMainActivity
 class SplashActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        //Change from MainScreenActivity to UsersMainActivity to debug
         startActivity(Intent(this, UsersMainActivity::class.java))
     }
 }
