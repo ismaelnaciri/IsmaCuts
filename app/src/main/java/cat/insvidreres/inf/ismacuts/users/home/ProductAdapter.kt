@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import cat.insvidreres.inf.ismacuts.databinding.ProductBinding
+import com.bumptech.glide.Glide
 
 class ProductAdapter(val context: Context, var dataset: List<Product>, val itemOnClickListener: (Product) -> Unit)
     : RecyclerView.Adapter<ProductAdapter.ProductViewHolder>() {
@@ -12,7 +13,10 @@ class ProductAdapter(val context: Context, var dataset: List<Product>, val itemO
         inner class ProductViewHolder(var binding: ProductBinding)
             : RecyclerView.ViewHolder(binding.root) {
                 fun bind(product: Product) {
-                    //TODO put the url into the image
+                    Glide.with(binding.productImageView.context).load(product.img).into(binding.productImageView)
+                    binding.selectProductButton.setOnClickListener {
+                        println(product.name + " selected")
+                    }
                 }
         }
 

@@ -40,7 +40,6 @@ import java.util.Locale
 class Repository : ErrorHandler {
 
     companion object {
-        var haircuts: LiveData<List<Haircut>>? = null
         private lateinit var storageRef: StorageReference
         var recyclerList = mutableListOf<User>()
         private val SALT: String = "+isma1234~$"
@@ -341,6 +340,8 @@ class Repository : ErrorHandler {
                                 service["serviceType"].toString(),
                             ))
                         }
+
+                        onComplete()
                     }
             } else {
                 db.collection("services")
@@ -350,15 +351,17 @@ class Repository : ErrorHandler {
                         val products = it.data?.get("services") as MutableList<Map<String, Any>>
                         if (products != null) {
                             for (service in products) {
-                                if (service["serviceType"].toString() === serviceType) {
+                                if (service["serviceType"] as String == serviceType) {
                                     productsList.add(Product(
-                                        service["name"].toString(),
-                                        service["img"].toString(),
-                                        service["serviceType"].toString(),
+                                        service["name"] as String,
+                                        service["img"] as String,
+                                        service["serviceType"] as String,
                                     ))
                                 }
                             }
                         }
+                        onComplete()
+                        println("ProductsList: $productsList")
                     }
             }
         }
@@ -369,7 +372,7 @@ class Repository : ErrorHandler {
 
             GlobalScope.launch(Dispatchers.Main) {
                 db.collection("services")
-                    .document("always")
+                    .document("servicesTypes")
                     .get()
                     .addOnSuccessListener {
                         val services = it.data?.get("services") as MutableList<Map<String, Any>>
@@ -378,14 +381,14 @@ class Repository : ErrorHandler {
                             servicesList.add(
                                 Service(
                                     service["name"].toString(),
-                                    service["img"].toString().lowercase(Locale.ROOT).replace(" ", "_"),
+                                    service["src"].toString().lowercase(Locale.ROOT).replace(" ", "_"),
                                     service["serviceType"].toString()
                                 )
                             )
                         }
 
                         onComplete()
-                        println(servicesList)
+                        println("ServicesList: $servicesList")
                     }
             }
         }

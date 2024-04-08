@@ -30,6 +30,10 @@ class UsersHomeFragment : Fragment() {
         productsRecyclerView.layoutManager =
             LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
 
+        viewModel.resetSelectedOptions()
+        viewModel.loadServices()
+        viewModel.loadProducts("")
+
         val productsAdapter = ProductAdapter(requireContext(), emptyList()) { selectedProduct ->
             //TODO Save service selected into a sharedviewmodel
         }
@@ -37,7 +41,7 @@ class UsersHomeFragment : Fragment() {
         val serviceAdapter = ServiceAdapter(requireContext(), emptyList()) { selectedService ->
             Toast.makeText(
                 requireContext(),
-                "Professional Selected: " + selectedService.name,
+                "Service Selected: " + selectedService.name,
                 Toast.LENGTH_LONG
             ).show()
 
@@ -55,18 +59,22 @@ class UsersHomeFragment : Fragment() {
                         "Deleted item: $selectedService",
                         Toast.LENGTH_SHORT
                     ).show()
+                    println("Deleted item: $selectedService")
                 })
 
             viewModel.loadProducts(selectedService.serviceType)
             productsAdapter.notifyDataSetChanged()
         }
 
-        viewModel.loadServices()
-        viewModel.loadProducts("")
 
         viewModel.services.observe(viewLifecycleOwner) { servicesList ->
             serviceAdapter.dataset = servicesList
             binding.horizontalServicesRV.adapter = serviceAdapter
+        }
+
+        viewModel.products.observe(viewLifecycleOwner) { productsList ->
+            productsAdapter.dataset = productsList
+            binding.usersHomeProductsRV.adapter = productsAdapter
         }
 
         return binding.root

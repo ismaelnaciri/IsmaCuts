@@ -11,15 +11,14 @@ class UsersHomeViewModel : ViewModel() {
     val services : LiveData<MutableList<Service>> = _services
 
     private var _products = MutableLiveData<MutableList<Product>>()
-    val product : LiveData<MutableList<Product>> = _products
+    val products : LiveData<MutableList<Product>> = _products
 
     var selectedOptions: MutableList<Any> = mutableListOf()
 
     fun updateSelectedItems(item: Any, onError: () -> Unit, onDelete: () -> Unit) {
         if (selectedOptions.size <= 2) {
-            // Check if the item is a Professional or Hour or Days
-            //|| item is Product
-            if (item is Service) {
+            // Check if the item is a Service or Product
+            if (item is Service || item is Product) {
                 val itemClass = item::class.java
                 val isItemAlreadySelected = selectedOptions.any { it.javaClass == itemClass }
 
@@ -35,6 +34,10 @@ class UsersHomeViewModel : ViewModel() {
                 onError()
             }
         }
+    }
+
+    fun resetSelectedOptions() {
+        this.selectedOptions.clear()
     }
 
     fun loadServices() {
