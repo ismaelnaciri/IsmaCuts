@@ -9,13 +9,6 @@
         android:title="@string/bottom_menu_home" />
 
     <item
-        android:id="@+id/usersBookingFragment"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:icon="@drawable/baseline_calendar_month_24"
-        android:title="@string/bottom_menu_booking" />
-
-    <item
         android:id="@+id/profileFragment"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

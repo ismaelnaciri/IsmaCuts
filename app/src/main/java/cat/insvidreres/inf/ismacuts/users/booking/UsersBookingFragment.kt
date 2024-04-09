@@ -36,6 +36,9 @@ class UsersBookingFragment : Fragment() {
         val hoursRecyclerView = binding.availableHoursRecyclerView
         val professionalsRecyclerView = binding.professionalsBookingRV
 
+        val toolbar = binding.bookingFragmentToolbar
+        toolbar.setNavigationOnClickListener { findNavController().navigateUp() }
+
         dayRecyclerView.layoutManager =
             LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         hoursRecyclerView.layoutManager =

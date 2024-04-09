@@ -1,8 +1,12 @@
 package cat.insvidreres.inf.ismacuts.main_screen
 
 import android.content.Intent
+import android.graphics.LinearGradient
+import android.graphics.Shader
+import android.graphics.drawable.GradientDrawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.core.content.ContextCompat
 import cat.insvidreres.inf.ismacuts.R
 import cat.insvidreres.inf.ismacuts.databinding.ActivityMainScreenBinding
 import cat.insvidreres.inf.ismacuts.login.LoginActivity
@@ -68,5 +72,18 @@ class MainScreenActivity : AppCompatActivity() {
                 println("Professional hour reset completed!!")
             }
         }
+
+        val textView = binding.mainScreenDescriptionTV
+
+        // Define the colors for the gradient
+        val startColor = ContextCompat.getColor(this, R.color.gradient_start)
+        val endColor = ContextCompat.getColor(this, R.color.gradient_end)
+
+        val gradient = LinearGradient(
+            0f, 0f, textView.paint.measureText(textView.text.toString()), 0f,
+            startColor, endColor, Shader.TileMode.CLAMP
+        )
+
+        textView.paint.shader = gradient
     }
 }

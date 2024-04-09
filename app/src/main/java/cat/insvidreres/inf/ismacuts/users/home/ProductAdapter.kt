@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import cat.insvidreres.inf.ismacuts.databinding.ProductBinding
+import cat.insvidreres.inf.ismacuts.users.booking.UsersBookingFragment
 import com.bumptech.glide.Glide
 
 class ProductAdapter(
@@ -23,6 +24,10 @@ class ProductAdapter(
                 itemOnClickListener(product)
             }
         }
+    }
+
+    interface NavigationListener {
+        fun navigateToBookingFragment()
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProductViewHolder {

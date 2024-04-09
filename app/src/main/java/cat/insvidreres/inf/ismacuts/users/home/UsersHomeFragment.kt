@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import cat.insvidreres.inf.ismacuts.R
 import cat.insvidreres.inf.ismacuts.databinding.FragmentUsersHomeBinding
 import cat.insvidreres.inf.ismacuts.users.HomeBookingSharedViewModel
+import cat.insvidreres.inf.ismacuts.users.booking.UsersBookingFragment
 
 
 class UsersHomeFragment : Fragment() {
@@ -35,30 +36,34 @@ class UsersHomeFragment : Fragment() {
         productsRecyclerView.layoutManager =
             LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
 
+        for (item in bookingSharedViewModel.selectedOptions) {
+            if (item is Product)
+                bookingSharedViewModel.selectedOptions.remove(item)
+        }
+
         viewModel.resetSelectedOptions()
         viewModel.loadServices()
         viewModel.loadProducts("")
 
-        val productsAdapter =
-            ProductAdapter(requireContext(), emptyList(),
-                itemOnClickListener = { selectedProduct ->
-                    Toast.makeText(
-                        requireContext(),
-                        "Product Selected: " + selectedProduct.name,
-                        Toast.LENGTH_LONG
-                    ).show()
+        val productsAdapter = ProductAdapter(requireContext(), emptyList(),
+            itemOnClickListener = { selectedProduct ->
+                Toast.makeText(
+                    requireContext(),
+                    "Product Selected: " + selectedProduct.name,
+                    Toast.LENGTH_LONG
+                ).show()
 
-                    bookingSharedViewModel.updateSelectedItems(selectedProduct,
-                        onError = {
-                            print("product fuck gg item")
-                        },
-                        onDelete = {
-                            print("${selectedProduct.name} deleted from updateSelectedItems")
-                        })
+                bookingSharedViewModel.updateSelectedItems(selectedProduct,
+                    onError = {
+                        print("product fuck gg item")
+                    },
+                    onDelete = {
+                        print("${selectedProduct.name} deleted from updateSelectedItems")
+                    })
 
-//                    findNavController().navigate(R.id.usersBookingFragment)
-                }
-            )
+                findNavController().navigate(R.id.usersBookingFragment)
+            },
+        )
 
 
         val serviceAdapter = ServiceAdapter(requireContext(), emptyList()) { selectedService ->

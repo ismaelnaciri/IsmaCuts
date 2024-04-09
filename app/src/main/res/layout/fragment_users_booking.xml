@@ -8,6 +8,15 @@
         android:layout_height="match_parent"
         tools:context=".users.booking.UsersBookingFragment">
 
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/bookingFragmentToolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:layout_constraintTop_toTopOf="parent"
+            app:navigationIcon="?android:attr/homeAsUpIndicator"
+            app:title="@string/appointment"
+            app:titleTextColor="@color/black"
+            />
 
         <TextView
             android:id="@+id/professionalsLabelTV"
@@ -64,8 +73,7 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.313"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    />
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/availableHoursRecyclerView"
