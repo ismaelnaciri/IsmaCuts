@@ -3,7 +3,8 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
-    <color name="background">#F8F0F0</color>
+    <color name="light_background_color">#F8F0F0</color>
+    <color name="dark_background_color">#242526</color>
     <color name="blue">#82CAFF</color>
 
     <color name="day_recycler_background">#FF81AD</color>
@@ -12,9 +13,19 @@
     <color name="bottom_nav_background">#FEDBD0</color>
     <color name="bottom_nav_item">#8C706D</color>
     <color name="bottom_nav_selected_item">#220006</color>
-    <color name="price_text_color">#168118</color>
+
     <color name="selected_item_booking_background">#B074EA</color>
 
     <color name="gradient_start">#fec707</color>
     <color name="gradient_end">#fea60b</color>
+
+
+    <!-- Light Theme collors -->
+    <color name="light_background">@color/light_background_color</color>
+    <color name="light_text_color">@color/black</color>
+
+    <!-- Dark Theme collors -->
+    <color name="dark_background">@color/dark_background_color</color>
+    <color name="dark_text_color">@color/white</color>
+
 </resources>

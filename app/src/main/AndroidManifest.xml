@@ -12,14 +12,16 @@
         android:enableOnBackInvokedCallback="true"
         android:forceDarkAllowed="false"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@drawable/barber_logo"
         android:label="@string/app_name"
+        android:icon="@drawable/barber_logo"
         android:roundIcon="@drawable/barber_logo"
         android:supportsRtl="true"
-        android:theme="@style/Theme.IsmaCuts">
+        android:theme="@style/Base.Theme.IsmaCuts">
         <activity
             android:name=".admins.AdminsMainActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/Base.Theme.IsmaCuts"
+            />
         <activity
             android:name=".SplashActivity"
             android:exported="true"
@@ -32,22 +34,29 @@
         </activity>
         <activity
             android:name=".recycler.SelectedUser"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/Base.Theme.IsmaCuts"/>
         <activity
             android:name=".recycler.RecyclerActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/Base.Theme.IsmaCuts"/>
         <activity
             android:name=".main_screen.MainScreenActivity"
-            android:exported="false"></activity>
+            android:exported="false"
+            android:theme="@style/Base.Theme.IsmaCuts"
+            />
         <activity
             android:name=".login.LoginActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/Base.Theme.IsmaCuts"/>
         <activity
             android:name=".register.RegisterActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/Base.Theme.IsmaCuts"/>
         <activity
             android:name=".users.UsersMainActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/Base.Theme.IsmaCuts"/>
 
         <meta-data
             android:name="preloaded_fonts"

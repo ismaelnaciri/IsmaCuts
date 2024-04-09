@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.addCallback
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
@@ -38,6 +39,10 @@ class UsersBookingFragment : Fragment() {
 
         val toolbar = binding.bookingFragmentToolbar
         toolbar.setNavigationOnClickListener { findNavController().navigateUp() }
+
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+            findNavController().navigateUp()
+        }
 
         dayRecyclerView.layoutManager =
             LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
@@ -114,7 +119,7 @@ class UsersBookingFragment : Fragment() {
                     Toast.LENGTH_SHORT
                 ).show()
 
-                viewModel.updateSelectedItems(selectedProfessional.email,
+                viewModel.updateSelectedItems(selectedProfessional,
                     onError = {
                         Toast.makeText(
                             requireContext(),
@@ -177,6 +182,8 @@ class UsersBookingFragment : Fragment() {
 
             println("selected items: ${viewModel.selectedOptions}")
 
+            println("ALL SELECTED ITEMS | ${bookingSharedViewModel.selectedOptions}")
+
             var name = ""
             var hour = ""
 
@@ -200,6 +207,7 @@ class UsersBookingFragment : Fragment() {
                 viewModel.resetHoursArray()
 
                 if (bookingSharedViewModel.checkIfAnyItemNull()) {
+                    println("OKAY OPTIONS IS OKAY")
                     bookingSharedViewModel.generateBookingInsert()
                     bookingSharedViewModel.insertBooking()
                 }

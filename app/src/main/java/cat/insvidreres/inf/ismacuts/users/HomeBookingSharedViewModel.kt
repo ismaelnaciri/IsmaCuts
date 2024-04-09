@@ -95,8 +95,10 @@ class HomeBookingSharedViewModel : ViewModel() {
             }
 
             if (product != null && days != null && hour != null && userEmail != null && professionalEmail != null) {
-                _book.value = Booking(userEmail, product, professionalEmail, days, hour)
 
+                println("ok no values are null")
+                _book.value = Booking(userEmail, product, professionalEmail, days, hour)
+                println("sussy _book ${_book.value}")
             } else {
                 print("GGGGGGGGGGG")
             }

@@ -49,9 +49,9 @@ class MainScreenActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        Glide.with(binding.mainScreenLogoIV.context).
-        load("https://firebasestorage.googleapis.com/v0/b/ismacuts-a6d41.appspot.com/o/Images%2Fbarber_logo-removebg-preview.png?alt=media&token=20d7ae70-c3b9-4b81-958f-63a24c154464")
-            .into(binding.mainScreenLogoIV)
+//        Glide.with(binding.mainScreenLogoIV.context).
+//        load("https://firebasestorage.googleapis.com/v0/b/ismacuts-a6d41.appspot.com/o/Images%2Fbarber_logo-removebg-preview.png?alt=media&token=20d7ae70-c3b9-4b81-958f-63a24c154464")
+//            .into(binding.mainScreenLogoIV)
 
 
         val currentYear = Calendar.getInstance().get(Calendar.YEAR)

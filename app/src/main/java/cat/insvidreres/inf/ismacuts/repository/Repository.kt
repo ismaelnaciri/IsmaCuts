@@ -28,6 +28,9 @@ import java.util.Base64
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 class Repository : ErrorHandler {
 
@@ -209,20 +212,22 @@ class Repository : ErrorHandler {
             GlobalScope.launch(Dispatchers.IO) {
                 val currentTime = Calendar.getInstance().timeInMillis
                 val dayStartTime = getDayStartTime(currentTime)
+                println("CurrentTime | $currentTime  | dayStartTime | $dayStartTime")
+
+                var hoursReset = getHours()
 
                 db.collection("professionals")
                     .get()
                     .addOnSuccessListener { querySnapshot ->
-                        var hoursReset = mutableListOf<Hour>()
-                        getHours {
-                            hoursReset = hoursList
-                            hoursList.clear()
-                        }
                         for (professional in querySnapshot) {
                             // Check if it's a new day since the last update
-                            val updatedTime = professional.get("updatedTime")?.toString()?.toLong() ?: 0
-                            if (updatedTime < dayStartTime && updatedTime.toInt() != 0) {
+                            val updatedTime =
+                                professional.get("updatedTime")?.toString()?.toLong() ?: 0
+                            println("checking the time on professional ${professional.data["name"].toString()}")
+                            println("updateTime firebase | $updatedTime  | daystarttime  $dayStartTime | is updatedTime < dayStartTime? | ${updatedTime < dayStartTime}")
+                            if (updatedTime < dayStartTime && updatedTime.toInt() != 0 && hoursReset.isNotEmpty()) {
                                 professional.data["appointments"] = hoursReset
+                                println("INSIDE IF of resetProfHours  | ${professional.data["appointments"] as List<String>}")
 
                                 db.collection("professionals")
                                     .document(professional.id)
@@ -250,30 +255,27 @@ class Repository : ErrorHandler {
         }
 
         //Helper fun to resetAllProfessionalHours
-        fun getHours(onComplete: () -> Unit) {
+        suspend fun getHours(): List<String> = suspendCoroutine { continuation ->
             val db = Firebase.firestore
-            hoursList.clear()
 
-            GlobalScope.launch(Dispatchers.Main) {
-                try {
-                    val documentSnapshot = db.collection("hours")
-                        .document("always")
-                        .get()
-                        .await()
-
+            db.collection("hours")
+                .document("always")
+                .get()
+                .addOnSuccessListener { documentSnapshot ->
                     val hours = documentSnapshot.data?.get("hours") as List<String>?
-                    if (hours != null) {
-                        hoursList.addAll(hours.map { Hour(it) })
-                        onComplete()
-                        println("Hours list: $hoursList")
+                    val hoursList = hours?.map { it } ?: emptyList()
+                    if (hoursList.isNotEmpty()) {
+                        println("Array of hours is not empty insane  | $hoursList")
                     } else {
-                        println("No hours data found")
+                        println("Array of hours is empty gggggggggggggggggg  | $hoursList")
                     }
-                } catch (e: Exception) {
-                    println("Error fetching hours data: $e")
+                    continuation.resume(hoursList)
                 }
-            }
+                .addOnFailureListener { e ->
+                    continuation.resumeWithException(e)
+                }
         }
+
 
         fun getHours(name: String, onComplete: () -> Unit) {
             val db = Firebase.firestore
@@ -319,11 +321,13 @@ class Repository : ErrorHandler {
                     .addOnSuccessListener {
                         val products = it.data?.get("services") as MutableList<Map<String, Any>>
                         for (service in products) {
-                            productsList.add(Product(
-                                service["name"].toString(),
-                                service["img"].toString(),
-                                service["serviceType"].toString(),
-                            ))
+                            productsList.add(
+                                Product(
+                                    service["name"].toString(),
+                                    service["img"].toString(),
+                                    service["serviceType"].toString(),
+                                )
+                            )
                         }
 
                         onComplete()
@@ -337,11 +341,13 @@ class Repository : ErrorHandler {
                         if (products != null) {
                             for (service in products) {
                                 if (service["serviceType"] as String == serviceType) {
-                                    productsList.add(Product(
-                                        service["name"] as String,
-                                        service["img"] as String,
-                                        service["serviceType"] as String,
-                                    ))
+                                    productsList.add(
+                                        Product(
+                                            service["name"] as String,
+                                            service["img"] as String,
+                                            service["serviceType"] as String,
+                                        )
+                                    )
                                 }
                             }
                         }
@@ -366,7 +372,8 @@ class Repository : ErrorHandler {
                             servicesList.add(
                                 Service(
                                     service["name"].toString(),
-                                    service["src"].toString().lowercase(Locale.ROOT).replace(" ", "_"),
+                                    service["src"].toString().lowercase(Locale.ROOT)
+                                        .replace(" ", "_"),
                                     service["serviceType"].toString()
                                 )
                             )
@@ -378,7 +385,11 @@ class Repository : ErrorHandler {
             }
         }
 
-        fun insertBooking(booking: Booking, onComplete: () -> Unit,  onError: (error: String) -> Unit) {
+        fun insertBooking(
+            booking: Booking,
+            onComplete: () -> Unit,
+            onError: (error: String) -> Unit
+        ) {
             val db = Firebase.firestore
 
             val mapList: MutableList<Map<String, Any>> = mutableListOf()
@@ -397,21 +408,35 @@ class Repository : ErrorHandler {
                 .get()
                 .addOnSuccessListener {
                     val bookings = it.data?.get("bookings") as MutableList<Map<String, Any>>
-                    bookings.addAll(mapList)
 
-                    val toFirestore = mutableMapOf<String, Any>()
-                    toFirestore["bookings"] = bookings
+                    if (bookings != null) {
+                        bookings.addAll(mapList)
 
-                    db.collection("bookings")
-                        .document(booking.professionalEmail)
-                        .update(toFirestore)
-                        .addOnSuccessListener {
-                            onComplete()
-                            println("Insert done, the document already EXISTED!!")
-                        }
-                        .addOnFailureListener {
-                            println("Error inserting, whilst the document existed  |  ${it.message}")
-                        }
+                        val toFirestore = mutableMapOf<String, Any>()
+                        toFirestore["bookings"] = bookings
+
+                        db.collection("bookings")
+                            .document(booking.professionalEmail)
+                            .update(toFirestore)
+                            .addOnSuccessListener {
+                                onComplete()
+                                println("Insert done, the document already EXISTED!!")
+                            }
+                            .addOnFailureListener {
+                                println("Error inserting, whilst the document existed  |  ${it.message}")
+                            }
+                    } else {
+                        db.collection("bookings")
+                            .document(booking.professionalEmail)
+                            .set(mapList)
+                            .addOnSuccessListener {
+                                onComplete()
+                                println("Inserted correctly. The document dod not exist")
+                            }
+                            .addOnFailureListener {
+                                println("Error inserting, whilst the document dod not exist  |  ${it.message}")
+                            }
+                    }
                 }
                 .addOnFailureListener {
                     db.collection("bookings")

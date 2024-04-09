@@ -6,13 +6,15 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".register.RegisterActivity">
+        tools:context=".register.RegisterActivity"
+        android:background="?attr/colorBackground">
 
         <ImageView
             android:id="@+id/registerLogoIV"
-            android:layout_width="151dp"
-            android:layout_height="124dp"
+            android:layout_width="179dp"
+            android:layout_height="187dp"
             android:layout_marginTop="16dp"
+            android:background="?attr/logoGeneral"
             android:minWidth="90dp"
             android:minHeight="90dp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -47,7 +49,7 @@
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp"
                 android:text="Or"
-                android:textColor="#000000"
+                android:textColor="?attr/textColor"
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
@@ -73,12 +75,15 @@
             android:id="@+id/registerUsernameET"
             android:layout_width="300dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="56dp"
+            android:layout_marginTop="32dp"
             android:drawableStart="@drawable/baseline_person_24"
+            android:drawableTint="?attr/textColor"
+            android:drawablePadding="5dp"
             android:ems="10"
             android:hint="Username"
             android:inputType="textEmailAddress"
             android:minHeight="48dp"
+            android:textColor="?attr/textColor"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.495"
             app:layout_constraintStart_toStartOf="parent"
@@ -90,8 +95,11 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="40dp"
             android:drawableStart="@drawable/baseline_email_24"
+            android:drawableTint="?attr/textColor"
+            android:drawablePadding="5dp"
             android:ems="10"
             android:hint="Email"
+            android:textColor="?attr/textColor"
             android:inputType="textEmailAddress"
             android:minHeight="48dp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -131,8 +139,11 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="68dp"
                 android:drawableStart="@drawable/baseline_lock_24"
+                android:drawableTint="?attr/textColor"
+                android:drawablePadding="5dp"
                 android:ems="10"
                 android:hint="Password"
+                android:textColor="?attr/textColor"
                 android:inputType="textPassword"
                 android:minHeight="48dp" />
         </com.google.android.material.textfield.TextInputLayout>
@@ -143,6 +154,8 @@
             android:layout_height="wrap_content"
             android:background="@drawable/main_gradient"
             android:text="Sign Up"
+            android:textStyle="bold"
+            android:textColor="?attr/textColor"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.495"

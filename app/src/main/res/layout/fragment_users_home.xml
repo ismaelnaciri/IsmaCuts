@@ -6,7 +6,8 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".users.home.UsersHomeFragment">
+        tools:context=".users.home.UsersHomeFragment"
+        android:background="?attr/colorBackground">
 
         <TextView
             android:id="@+id/mainScreenDescriptionTV"
@@ -15,9 +16,9 @@
             android:layout_marginBottom="40dp"
             android:fontFamily="@font/allura"
             android:text="THE Barbershop"
-            android:textSize="40sp"
-            android:textColor="@color/black"
+            android:textColor="?attr/textColor"
             android:textStyle="bold"
+            android:textSize="40sp"
             android:textAlignment="center"
             android:gravity="center"
             app:layout_constraintBottom_toTopOf="@+id/userHomeSearchBar"
@@ -47,7 +48,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="36dp"
             android:layout_marginEnd="8dp"
-            android:textColor="@color/black"
+            android:textColor="?attr/textColor"
             android:textStyle="bold"
             android:text="Services"
             android:textSize="20sp"
@@ -77,7 +78,7 @@
             android:layout_marginTop="40dp"
             android:layout_marginEnd="8dp"
             android:text="Products"
-            android:textColor="@color/black"
+            android:textColor="?attr/textColor"
             android:textSize="20sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"

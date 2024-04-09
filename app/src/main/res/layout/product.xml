@@ -31,7 +31,7 @@
                     android:background="@drawable/main_gradient"
                     android:gravity="center"
                     android:text="Select"
-                    android:textColor="@color/black"
+                    android:textColor="?attr/textColor"
                     android:textStyle="bold"
                     app:layout_constraintBottom_toBottomOf="parent" />
 

@@ -30,11 +30,13 @@ class UserBookingViewModel : ViewModel() {
                 if (isItemAlreadySelected) {
                     onDelete()
                     selectedOptions.removeAll { it.javaClass == itemClass }
-                    println("selectedOptions by deleted: $selectedOptions")
+                    println("viewmodel by deleted: $selectedOptions")
                 } else {
                     selectedOptions.add(item)
-                    println("selectedOptions by added: $selectedOptions")
+                    println("viewmodel by added: $selectedOptions")
                 }
+
+                println("viewmodel all |  $selectedOptions")
             } else {
                 onError()
             }

@@ -7,7 +7,8 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".users.UsersMainActivity">
+        tools:context=".users.UsersMainActivity"
+        android:background="?attr/colorBackground">
 
         <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/bottomMenuView"

@@ -3,16 +3,19 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     >
 
-    <item android:drawable="@color/background" />
+    <item android:drawable="?attr/colorBackground" />
 
     <item
         android:bottom="230dp"
-        android:left="10dp"
+        android:left="30dp"
         android:right="10dp"
         android:top="230dp"
         >
 
-        <bitmap android:src="@drawable/barber_logo_removebg" />
+        <bitmap
+            android:src="?attr/logoGeneral"
+            android:gravity="center"
+            />
 
     </item>
 </layer-list>

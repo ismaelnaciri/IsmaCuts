@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <attr name="colorBackground" format="reference|color" />
+    <attr name="textColor" format="reference|color"/>
+    <attr name="professionalBackground" format="reference|color"/>
+    <attr name="logoGeneral" format="reference"/>
+</resources>

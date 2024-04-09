@@ -2,12 +2,16 @@
     <!-- Base application theme. -->
     <style name="Base.Theme.IsmaCuts" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="colorBackground">@color/light_background</item>
+        <item name="textColor">@color/light_text_color</item>
+        <item name="professionalBackground">@color/dark_background</item>
+        <item name="logoGeneral">@drawable/barber_logo_black</item>
     </style>
 
     <style name="Theme.IsmaCuts" parent="Base.Theme.IsmaCuts" />
 
     <style name="SplashTheme" parent="Theme.AppCompat.NoActionBar">
         <item name="android:windowBackground">@drawable/splas_background</item>
+        <item name="logoGeneral">@drawable/barber_logo_black</item>
     </style>
 </resources>
