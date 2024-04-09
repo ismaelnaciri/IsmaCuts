@@ -46,8 +46,8 @@ class LoginActivity : AppCompatActivity(), ErrorHandler {
                 !binding.passwordT.text.isNullOrEmpty()
             ) {
 
-                val email = binding.loginEmailET.text.toString()
-                val password = binding.passwordT.text.toString()
+                val email = binding.loginEmailET.text.toString().lowercase().trim().replace(" ", "")
+                val password = binding.passwordT.text.toString().lowercase().trim().replace(" ", "")
 
                 if (viewModel.loginWithEmailAndPw(email, password)) {
                     goToMainActivity(this, email)

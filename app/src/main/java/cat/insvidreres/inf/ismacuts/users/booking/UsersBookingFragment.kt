@@ -37,9 +37,11 @@ class UsersBookingFragment : Fragment() {
         val hoursRecyclerView = binding.availableHoursRecyclerView
         val professionalsRecyclerView = binding.professionalsBookingRV
 
+        //Handle top back arrow
         val toolbar = binding.bookingFragmentToolbar
         toolbar.setNavigationOnClickListener { findNavController().navigateUp() }
 
+        //Handle hardware back button
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
             findNavController().navigateUp()
         }
@@ -55,18 +57,10 @@ class UsersBookingFragment : Fragment() {
 
             viewModel.updateSelectedItems(selectedDay,
                 onError = {
-                    Toast.makeText(
-                        requireContext(),
-                        "selectedOptions size: ${viewModel.selectedOptions.size}",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    println("selectedOptions size: ${viewModel.selectedOptions.size}")
                 },
                 onDelete = {
-                    Toast.makeText(
-                        requireContext(),
-                        "Deleted item: $selectedDay",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    println("Deleted item: $selectedDay")
                 })
 
 
@@ -75,7 +69,7 @@ class UsersBookingFragment : Fragment() {
                     print("day fuck gg item")
                 },
                 onDelete = {
-                    print("${selectedDay} deleted from updateSelectedItems")
+                    print("$selectedDay deleted from updateSelectedItems")
                 })
         }
 
@@ -88,18 +82,10 @@ class UsersBookingFragment : Fragment() {
 
             viewModel.updateSelectedItems(selectedHour,
                 onError = {
-                    Toast.makeText(
-                        requireContext(),
-                        "Error wtf",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    println("Error wtf")
                 },
                 onDelete = {
-                    Toast.makeText(
-                        requireContext(),
-                        "Deleted item: $selectedHour",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    println("Deleted item: $selectedHour")
                 })
 
             bookingSharedViewModel.updateSelectedItems(selectedHour,
@@ -121,18 +107,10 @@ class UsersBookingFragment : Fragment() {
 
                 viewModel.updateSelectedItems(selectedProfessional,
                     onError = {
-                        Toast.makeText(
-                            requireContext(),
-                            "Error wtf",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        println("wtf error")
                     },
                     onDelete = {
-                        Toast.makeText(
-                            requireContext(),
-                            "Deleted item: $selectedProfessional",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        println("Deleted item: $selectedProfessional")
                     })
 
                 bookingSharedViewModel.updateSelectedItems(selectedProfessional.email,
@@ -206,10 +184,14 @@ class UsersBookingFragment : Fragment() {
                 viewModel.selectedOptions.clear()
                 viewModel.resetHoursArray()
 
-                if (bookingSharedViewModel.checkIfAnyItemNull()) {
+                //Here's the issue. This method returns false
+                println("checkIfAnyItemNull  |  ${bookingSharedViewModel.checkIfAnyItemNull()}")
+                if (!bookingSharedViewModel.checkIfAnyItemNull()) {
                     println("OKAY OPTIONS IS OKAY")
                     bookingSharedViewModel.generateBookingInsert()
-                    bookingSharedViewModel.insertBooking()
+                    bookingSharedViewModel.insertBooking() {
+                        findNavController().navigateUp()
+                    }
                 }
 
                 hourAdapter.notifyDataSetChanged()

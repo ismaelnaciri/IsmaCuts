@@ -1,6 +1,7 @@
 package cat.insvidreres.inf.ismacuts.users.home
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -36,22 +37,23 @@ class UsersHomeFragment : Fragment() {
         productsRecyclerView.layoutManager =
             LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
 
-        for (item in bookingSharedViewModel.selectedOptions) {
-            if (item is Product)
-                bookingSharedViewModel.selectedOptions.remove(item)
+        try {
+            for (item in bookingSharedViewModel.selectedOptions) {
+                if (item is Product)
+                    bookingSharedViewModel.selectedOptions.remove(item)
+            }
+        } catch (e: Exception) {
+            Log.e("For loop home fragment", "Error | ${e.message}")
         }
 
         viewModel.resetSelectedOptions()
         viewModel.loadServices()
         viewModel.loadProducts("")
 
-        val productsAdapter = ProductAdapter(requireContext(), emptyList(),
+        val productsAdapter = ProductAdapter(
+            requireContext(), emptyList(),
             itemOnClickListener = { selectedProduct ->
-                Toast.makeText(
-                    requireContext(),
-                    "Product Selected: " + selectedProduct.name,
-                    Toast.LENGTH_LONG
-                ).show()
+                println("Product Selected: ${selectedProduct.name}")
 
                 bookingSharedViewModel.updateSelectedItems(selectedProduct,
                     onError = {
@@ -60,7 +62,6 @@ class UsersHomeFragment : Fragment() {
                     onDelete = {
                         print("${selectedProduct.name} deleted from updateSelectedItems")
                     })
-
                 findNavController().navigate(R.id.usersBookingFragment)
             },
         )
@@ -70,7 +71,7 @@ class UsersHomeFragment : Fragment() {
             Toast.makeText(
                 requireContext(),
                 "Service Selected: " + selectedService.name,
-                Toast.LENGTH_LONG
+                Toast.LENGTH_SHORT
             ).show()
 
             viewModel.updateSelectedItems(selectedService,
@@ -81,7 +82,13 @@ class UsersHomeFragment : Fragment() {
                     println("Deleted item: $selectedService")
                 })
 
-            viewModel.loadProducts(selectedService.serviceType)
+            //TODO Try after 2nd click load all products
+            if (viewModel.products.value?.any { it.serviceType != selectedService.serviceType } == true) {
+                println("if works?  | ${viewModel.products.value?.any { it.serviceType != selectedService.serviceType }}")
+                viewModel.loadProducts("")
+            } else {
+                viewModel.loadProducts(selectedService.serviceType)
+            }
             productsAdapter.notifyDataSetChanged()
         }
 

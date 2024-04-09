@@ -212,7 +212,6 @@ class Repository : ErrorHandler {
             GlobalScope.launch(Dispatchers.IO) {
                 val currentTime = Calendar.getInstance().timeInMillis
                 val dayStartTime = getDayStartTime(currentTime)
-                println("CurrentTime | $currentTime  | dayStartTime | $dayStartTime")
 
                 var hoursReset = getHours()
 
@@ -223,11 +222,8 @@ class Repository : ErrorHandler {
                             // Check if it's a new day since the last update
                             val updatedTime =
                                 professional.get("updatedTime")?.toString()?.toLong() ?: 0
-                            println("checking the time on professional ${professional.data["name"].toString()}")
-                            println("updateTime firebase | $updatedTime  | daystarttime  $dayStartTime | is updatedTime < dayStartTime? | ${updatedTime < dayStartTime}")
                             if (updatedTime < dayStartTime && updatedTime.toInt() != 0 && hoursReset.isNotEmpty()) {
                                 professional.data["appointments"] = hoursReset
-                                println("INSIDE IF of resetProfHours  | ${professional.data["appointments"] as List<String>}")
 
                                 db.collection("professionals")
                                     .document(professional.id)
@@ -392,65 +388,71 @@ class Repository : ErrorHandler {
         ) {
             val db = Firebase.firestore
 
-            val mapList: MutableList<Map<String, Any>> = mutableListOf()
+            try {
+                val bookMap = mutableMapOf<String, Any>()
+                bookMap["userEmail"] = booking.userEmail
+                bookMap["product"] = booking.product
+                bookMap["professionalEmail"] = booking.professionalEmail
+                bookMap["days"] = booking.days
+                bookMap["hour"] = booking.hour
 
-            val bookMap = mutableMapOf<String, Any>()
-            bookMap["userEmail"] = booking.userEmail
-            bookMap["product"] = booking.product
-            bookMap["professionalEmail"] = booking.professionalEmail
-            bookMap["days"] = booking.days
-            bookMap["hour"] = booking.hour
+                db.collection("bookings")
+                    .document(booking.professionalEmail)
+                    .get()
+                    .addOnSuccessListener {
+                        println("inside first get")
+                        val test = it.data?.get("bookings")
+                        //If test is null means document doesn't exist
+                        //Returns the fields of the document as a Map or null if the document doesn't exist
+                        if (test != null) {
+                            val bookings = test as MutableList<Map<String, Any>>
+                            bookings.add(bookMap)
 
-            mapList.add(bookMap)
+                            val toFirestore = mutableMapOf<String, Any>()
+                            toFirestore["bookings"] = bookings
 
-            db.collection("bookings")
-                .document(booking.professionalEmail)
-                .get()
-                .addOnSuccessListener {
-                    val bookings = it.data?.get("bookings") as MutableList<Map<String, Any>>
+                            db.collection("bookings")
+                                .document(booking.professionalEmail)
+                                .update(toFirestore)
+                                .addOnSuccessListener {
+                                    println("inside first update")
+                                    println("Insert done, the document already EXISTED!!")
+                                }
+                                .addOnFailureListener {
+                                    println("Error inserting, whilst the document existed  |  ${it.message}")
+                                }
 
-                    if (bookings != null) {
-                        bookings.addAll(mapList)
-
-                        val toFirestore = mutableMapOf<String, Any>()
-                        toFirestore["bookings"] = bookings
-
+                        } else {
+                            db.collection("bookings")
+                                .document(booking.professionalEmail)
+                                .set(bookMap)
+                                .addOnSuccessListener {
+                                    println("inside else set")
+                                    println("Inserted correctly. The document dod not exist")
+                                }
+                                .addOnFailureListener {
+                                    println("Error inserting, whilst the document dod not exist  |  ${it.message}")
+                                }
+                        }
+                    }
+                    .addOnFailureListener {
                         db.collection("bookings")
                             .document(booking.professionalEmail)
-                            .update(toFirestore)
+                            .set(bookMap)
                             .addOnSuccessListener {
-                                onComplete()
-                                println("Insert done, the document already EXISTED!!")
-                            }
-                            .addOnFailureListener {
-                                println("Error inserting, whilst the document existed  |  ${it.message}")
-                            }
-                    } else {
-                        db.collection("bookings")
-                            .document(booking.professionalEmail)
-                            .set(mapList)
-                            .addOnSuccessListener {
-                                onComplete()
+                                println("inside failure set")
                                 println("Inserted correctly. The document dod not exist")
                             }
                             .addOnFailureListener {
                                 println("Error inserting, whilst the document dod not exist  |  ${it.message}")
                             }
                     }
-                }
-                .addOnFailureListener {
-                    db.collection("bookings")
-                        .document(booking.professionalEmail)
-                        .set(mapList)
-                        .addOnSuccessListener {
-                            onComplete()
-                            println("Inserted correctly. The document dod not exist")
-                        }
-                        .addOnFailureListener {
-                            println("Error inserting, whilst the document dod not exist  |  ${it.message}")
-                        }
-                }
 
+                onComplete()
+            } catch (e: Exception) {
+                println("ERROR in insertBooking wtf  |  ${e.message}")
+                onError(e.message.toString())
+            }
         }
 
         //TODO Make getBookings for admin, needs a professional name

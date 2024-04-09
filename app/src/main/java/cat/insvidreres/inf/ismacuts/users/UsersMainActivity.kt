@@ -31,6 +31,8 @@ class UsersMainActivity : AppCompatActivity() {
                 onDelete = {
                     print("${userEmail} deleted from updateSelectedItems")
                 })
+
+            bookingSharedViewModel.userEmail = userEmail
         }
         val navHostFragment = supportFragmentManager.findFragmentById(binding.fragmentContainerViewTag.id) as NavHostFragment
         navController = navHostFragment.navController

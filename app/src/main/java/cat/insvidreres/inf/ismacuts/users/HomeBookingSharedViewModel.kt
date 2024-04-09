@@ -18,8 +18,9 @@ class HomeBookingSharedViewModel : ViewModel() {
     val booking: LiveData<MutableList<Booking>> = _booking
 
     var _book = MutableLiveData<Booking>()
-
     var selectedOptions: MutableList<Any> = mutableListOf()
+
+    var userEmail: String = ""
     fun updateSelectedItems(item: Any, onError: () -> Unit, onDelete: () -> Unit) {
         if (selectedOptions.size <= 5) {
             // Check if the item is User or Product or Professional or Days or Hour
@@ -59,13 +60,18 @@ class HomeBookingSharedViewModel : ViewModel() {
     }
 
 
+    //XXXXXXXXDDDDD  SO IM CHECKING THE VALUE OF A NULL OBJECT BEFORE UPDATING IT XD
+    //Should loop through array and chen if items are null
+//    fun checkIfAnyItemNull() : Boolean {
+//        return (_book.value?.userEmail != null
+//                && _book.value?.product != null
+//                && _book.value?.professionalEmail != null
+//                && _book.value?.days != null
+//                && _book.value?.hour != null)
+//    }
 
-    fun checkIfAnyItemNull() : Boolean {
-        return (_book.value?.userEmail != null
-                && _book.value?.product != null
-                && _book.value?.professionalEmail != null
-                && _book.value?.days != null
-                && _book.value?.hour != null)
+    fun checkIfAnyItemNull(): Boolean {
+        return selectedOptions.any { item -> item == null }
     }
 
 
@@ -95,10 +101,7 @@ class HomeBookingSharedViewModel : ViewModel() {
             }
 
             if (product != null && days != null && hour != null && userEmail != null && professionalEmail != null) {
-
-                println("ok no values are null")
                 _book.value = Booking(userEmail, product, professionalEmail, days, hour)
-                println("sussy _book ${_book.value}")
             } else {
                 print("GGGGGGGGGGG")
             }
@@ -109,12 +112,15 @@ class HomeBookingSharedViewModel : ViewModel() {
     }
 
 
-    fun insertBooking() {
+    fun insertBooking(onComplete: () -> Unit) {
         _book.value?.let { book ->
             Repository.insertBooking(
                 book,
                 onComplete = {
                     print("Insert correct!!!! PRRRRRRRR")
+                    resetSelectedOptions()
+
+                    onComplete()
                 },
                 onError = {
                     print("ERROR IN INSERT | $it")
@@ -123,7 +129,13 @@ class HomeBookingSharedViewModel : ViewModel() {
         }
     }
 
+    fun resetSelectedOptions() {
+        selectedOptions.clear()
+        selectedOptions.add(userEmail)
+    }
+
     fun loadBookings(professionalName: String) {
 
     }
+
 }
