@@ -52,7 +52,8 @@ class LoginActivity : AppCompatActivity(), ErrorHandler {
 
 
     private fun goToMainActivity(context: Context) {
-        val intent = Intent(context, UsersMainActivity::class.java)
+//        val intent = Intent(context, UsersMainActivity::class.java)
+        val intent = Intent(context, RecyclerActivity::class.java)
         startActivity(intent)
     }
 
