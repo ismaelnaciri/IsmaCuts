@@ -459,7 +459,6 @@ class Repository : ErrorHandler {
         fun getBookings(professionalName: String, onComplete: () -> Unit) {
 
         }
-        //TODO Make fun that resets all professionals appointments array in firebase after a new day
         //TODO update signIn method so that it detects somehow when to insert into users and when into professionals
 
         fun getDays(onComplete: () -> Unit) {

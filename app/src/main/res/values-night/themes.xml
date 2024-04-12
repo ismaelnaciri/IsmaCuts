@@ -4,7 +4,7 @@
         <!-- Customize your dark theme here. -->
         <item name="colorBackground">@color/dark_background</item>
         <item name="textColor">@color/dark_text_color</item>
-        <item name="professionalBackground">@color/light_background</item>
+        <item name="professionalBackground">@color/professional_background_dark</item>
         <item name="logoGeneral">@drawable/barber_logo_white_1</item>
     </style>
 

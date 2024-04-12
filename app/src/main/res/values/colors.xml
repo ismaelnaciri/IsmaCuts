@@ -19,12 +19,15 @@
     <color name="gradient_start">#fec707</color>
     <color name="gradient_end">#fea60b</color>
 
+    <!-- Professional Background colors-->
+    <color name="professional_background_light">@color/light_background</color>
+    <color name="professional_background_dark">@color/dark_background</color>
 
-    <!-- Light Theme collors -->
+    <!-- Light Theme colors -->
     <color name="light_background">@color/light_background_color</color>
     <color name="light_text_color">@color/black</color>
 
-    <!-- Dark Theme collors -->
+    <!-- Dark Theme colors -->
     <color name="dark_background">@color/dark_background_color</color>
     <color name="dark_text_color">@color/white</color>
 

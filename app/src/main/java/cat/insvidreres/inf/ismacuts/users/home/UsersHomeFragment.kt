@@ -82,12 +82,12 @@ class UsersHomeFragment : Fragment() {
                     println("Deleted item: $selectedService")
                 })
 
-            //TODO Try after 2nd click load all products
-            if (viewModel.products.value?.any { it.serviceType != selectedService.serviceType } == true) {
+            if (viewModel.products.value?.any { it.serviceType != selectedService.serviceType }!!) {
                 println("if works?  | ${viewModel.products.value?.any { it.serviceType != selectedService.serviceType }}")
-                viewModel.loadProducts("")
-            } else {
+                println("Let's see this shit  | ${viewModel.products.value}")
                 viewModel.loadProducts(selectedService.serviceType)
+            } else {
+                viewModel.loadProducts("")
             }
             productsAdapter.notifyDataSetChanged()
         }
