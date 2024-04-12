@@ -61,6 +61,7 @@ class LoginActivity : AppCompatActivity(), ErrorHandler {
     private fun goToMainActivity(context: Context, email: String) {
         val intent = Intent(context, UsersMainActivity::class.java)
         intent.putExtra("userEmail", email)
+        intent.putExtra("adminEmail", email)
         startActivity(intent)
     }
 

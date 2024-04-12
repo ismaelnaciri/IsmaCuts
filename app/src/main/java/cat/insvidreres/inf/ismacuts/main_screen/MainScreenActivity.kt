@@ -56,7 +56,7 @@ class MainScreenActivity : AppCompatActivity() {
 
         val currentYear = Calendar.getInstance().get(Calendar.YEAR)
 
-        GlobalScope.launch(Dispatchers.Default) {
+        GlobalScope.launch(Dispatchers.IO) {
             val lastDocumentYear = Repository.getLastDocumentYear()
 
             if (lastDocumentYear == null || currentYear > lastDocumentYear) {

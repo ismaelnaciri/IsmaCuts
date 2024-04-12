@@ -27,9 +27,11 @@
 
                 <ImageView
                     android:id="@+id/userRecyclerIV"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:contentDescription="TODO"
+                    android:scaleType="center"
+                    android:adjustViewBounds="true"
                     />
             </androidx.cardview.widget.CardView>
 

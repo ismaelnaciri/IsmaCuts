@@ -3,15 +3,17 @@ package cat.insvidreres.inf.ismacuts.users.home
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import cat.insvidreres.inf.ismacuts.repository.Repository
+import kotlinx.coroutines.launch
 
 class UsersHomeViewModel : ViewModel() {
 
     private var _services = MutableLiveData<MutableList<Service>>()
-    val services : LiveData<MutableList<Service>> = _services
+    val services: LiveData<MutableList<Service>> = _services
 
     private var _products = MutableLiveData<MutableList<Product>>()
-    val products : LiveData<MutableList<Product>> = _products
+    val products: LiveData<MutableList<Product>> = _products
 
     var selectedOptions: MutableList<Any> = mutableListOf()
 
@@ -44,7 +46,9 @@ class UsersHomeViewModel : ViewModel() {
         _services.value?.clear()
 
         Repository.getServices {
-            _services.value = Repository.servicesList
+            viewModelScope.launch {
+                _services.value = Repository.servicesList
+            }
         }
     }
 
@@ -52,8 +56,10 @@ class UsersHomeViewModel : ViewModel() {
         _products.value?.clear()
 
         Repository.getProducts(serviceType) {
-            _products.value = Repository.productsList
-            println("very sussy indeed")
+            viewModelScope.launch {
+                _products.value = Repository.productsList
+                println("very sussy indeed")
+            }
         }
     }
 

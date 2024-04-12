@@ -69,6 +69,7 @@ class Repository : ErrorHandler {
         }
 
         //TODO Change so that it kn ows if email is admin
+        //TODO update signIn method so that it detects somehow when to insert into users and when into professionals
         fun signIn(email: String, password: String): Boolean {
             try {
                 FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
@@ -136,39 +137,41 @@ class Repository : ErrorHandler {
 
             professionalList.clear()
 
-            db.collection("professionals")
-                .whereArrayContains("services", service)
-                .get()
-                .addOnSuccessListener {
-                    for (professional in it) {
-                        var appHourArray = mutableListOf<Hour>()
-                        val appointmentArrayString =
-                            professional.data["appointments"] as MutableList<String>
+            GlobalScope.launch(Dispatchers.IO) {
+                db.collection("professionals")
+                    .whereArrayContains("services", service)
+                    .get()
+                    .addOnSuccessListener {
+                        for (professional in it) {
+                            var appHourArray = mutableListOf<Hour>()
+                            val appointmentArrayString =
+                                professional.data["appointments"] as MutableList<String>
 
-                        for (hour in appointmentArrayString) {
-                            appHourArray.add(Hour(hour))
+                            for (hour in appointmentArrayString) {
+                                appHourArray.add(Hour(hour))
+                            }
+
+                            val pro = Professional(
+                                professional.data["name"].toString(),
+                                professional.data["email"].toString(),
+                                professional.data["password"].toString(),
+                                professional.data["reviews"] as MutableList<Number>,
+                                professional.data["services"] as MutableList<String>,
+                                appHourArray,
+                                professional.data["updatedTime"] as Number,
+                                "",
+                                professional.data["img"].toString(),
+                            )
+                            professionalList.add(pro)
+                            println("Professionals list: $professionalList")
                         }
 
-                        val pro = Professional(
-                            professional.data["name"].toString(),
-                            professional.data["email"].toString(),
-                            professional.data["password"].toString(),
-                            professional.data["reviews"] as MutableList<Number>,
-                            professional.data["services"] as MutableList<String>,
-                            appHourArray,
-                            professional.data["updatedTime"] as Number,
-                            "",
-                            professional.data["img"].toString(),
-                        )
-                        professionalList.add(pro)
-                        println("Professionals list: $professionalList")
+                        onComplete()
                     }
-
-                    onComplete()
-                }
-                .addOnFailureListener {
-                    println("Error getting the professionals!!! $it")
-                }
+                    .addOnFailureListener {
+                        println("Error getting the professionals!!! $it")
+                    }
+            }
         }
 
         fun updateProfessionalAvailableHours(
@@ -178,7 +181,7 @@ class Repository : ErrorHandler {
         ) {
             val db = Firebase.firestore
 
-            GlobalScope.launch(Dispatchers.Main) {
+            GlobalScope.launch(Dispatchers.IO) {
                 db.collection("professionals")
                     .whereEqualTo("name", name)
                     .get()
@@ -277,7 +280,7 @@ class Repository : ErrorHandler {
             val db = Firebase.firestore
             hoursList.clear()
 
-            GlobalScope.launch(Dispatchers.Main) {
+            GlobalScope.launch(Dispatchers.IO) {
                 try {
                     db.collection("professionals")
                         .whereEqualTo("name", name)
@@ -310,46 +313,48 @@ class Repository : ErrorHandler {
             val db = Firebase.firestore
             productsList.clear()
 
-            if (serviceType.isEmpty()) {
-                db.collection("services")
-                    .document("always")
-                    .get()
-                    .addOnSuccessListener {
-                        val products = it.data?.get("services") as MutableList<Map<String, Any>>
-                        for (service in products) {
-                            productsList.add(
-                                Product(
-                                    service["name"].toString(),
-                                    service["img"].toString(),
-                                    service["serviceType"].toString(),
-                                )
-                            )
-                        }
-
-                        onComplete()
-                    }
-            } else {
-                db.collection("services")
-                    .document("always")
-                    .get()
-                    .addOnSuccessListener {
-                        val products = it.data?.get("services") as MutableList<Map<String, Any>>
-                        if (products != null) {
+            GlobalScope.launch(Dispatchers.IO) {
+                if (serviceType.isEmpty()) {
+                    db.collection("services")
+                        .document("always")
+                        .get()
+                        .addOnSuccessListener {
+                            val products = it.data?.get("services") as MutableList<Map<String, Any>>
                             for (service in products) {
-                                if (service["serviceType"] as String == serviceType) {
-                                    productsList.add(
-                                        Product(
-                                            service["name"] as String,
-                                            service["img"] as String,
-                                            service["serviceType"] as String,
-                                        )
+                                productsList.add(
+                                    Product(
+                                        service["name"].toString(),
+                                        service["img"].toString(),
+                                        service["serviceType"].toString(),
                                     )
+                                )
+                            }
+
+                            onComplete()
+                        }
+                } else {
+                    db.collection("services")
+                        .document("always")
+                        .get()
+                        .addOnSuccessListener {
+                            val products = it.data?.get("services") as MutableList<Map<String, Any>>
+                            if (products != null) {
+                                for (service in products) {
+                                    if (service["serviceType"] as String == serviceType) {
+                                        productsList.add(
+                                            Product(
+                                                service["name"] as String,
+                                                service["img"] as String,
+                                                service["serviceType"] as String,
+                                            )
+                                        )
+                                    }
                                 }
                             }
+                            onComplete()
+                            println("ProductsList: $productsList")
                         }
-                        onComplete()
-                        println("ProductsList: $productsList")
-                    }
+                }
             }
         }
 
@@ -357,7 +362,7 @@ class Repository : ErrorHandler {
             val db = Firebase.firestore
             servicesList.clear()
 
-            GlobalScope.launch(Dispatchers.Main) {
+            GlobalScope.launch(Dispatchers.IO) {
                 db.collection("services")
                     .document("servicesTypes")
                     .get()
@@ -393,7 +398,7 @@ class Repository : ErrorHandler {
                 bookMap["userEmail"] = booking.userEmail
                 bookMap["product"] = booking.product
                 bookMap["professionalEmail"] = booking.professionalEmail
-                bookMap["days"] = booking.days
+                bookMap["day"] = booking.days
                 bookMap["hour"] = booking.hour
 
                 db.collection("bookings")
@@ -423,9 +428,12 @@ class Repository : ErrorHandler {
                                 }
 
                         } else {
+                            val toFirestore = mutableMapOf<String, Any>()
+                            toFirestore["bookings"] = bookMap
+
                             db.collection("bookings")
                                 .document(booking.professionalEmail)
-                                .set(bookMap)
+                                .set(toFirestore)
                                 .addOnSuccessListener {
                                     println("inside else set")
                                     println("Inserted correctly. The document dod not exist")
@@ -436,9 +444,12 @@ class Repository : ErrorHandler {
                         }
                     }
                     .addOnFailureListener {
+                        val toFirestore = mutableMapOf<String, Any>()
+                        toFirestore["bookings"] = bookMap
+
                         db.collection("bookings")
                             .document(booking.professionalEmail)
-                            .set(bookMap)
+                            .set(toFirestore)
                             .addOnSuccessListener {
                                 println("inside failure set")
                                 println("Inserted correctly. The document dod not exist")
@@ -455,16 +466,51 @@ class Repository : ErrorHandler {
             }
         }
 
-        //TODO Make getBookings for admin, needs a professional name
-        fun getBookings(professionalName: String, onComplete: () -> Unit) {
+        fun getBookings(professionalEmail: String, onComplete: () -> Unit) {
+            bookngsList.clear()
+            val db = Firebase.firestore
 
+            GlobalScope.launch(Dispatchers.IO) {
+                if (professionalEmail != null) {
+                    try {
+                        db.collection("bookings")
+                            .document(professionalEmail)
+                            .get()
+                            .addOnSuccessListener {
+                                val test = it.data?.get("bookings")
+
+                                if (test != null) {
+                                    val bookings = test as MutableList<Map<String, Any>>
+
+                                    for (item in bookings) {
+                                        bookngsList.add(
+                                            Booking(
+                                                item["userEmail"].toString(),
+                                                item["products"] as Product,
+                                                item["professionalEmail"].toString(),
+                                                item["day"] as Days,
+                                                item["hour"] as Hour
+                                            )
+                                        )
+                                    }
+                                } else {
+                                    println("bookings did not exist")
+                                }
+
+                                onComplete()
+                            }
+
+                    } catch (e: Exception) {
+                        println("Error getting bookings | ${e.message}")
+                    }
+                }
+            }
         }
-        //TODO update signIn method so that it detects somehow when to insert into users and when into professionals
 
         fun getDays(onComplete: () -> Unit) {
             daysList.clear()
 
-            GlobalScope.launch(Dispatchers.Main) {
+            GlobalScope.launch(Dispatchers.IO) {
                 val currentYear = Calendar.getInstance().get(Calendar.YEAR)
                 val currentMonth = Calendar.getInstance()
                     .get(Calendar.MONTH) + 1 // Months are 0-indexed in Calendar

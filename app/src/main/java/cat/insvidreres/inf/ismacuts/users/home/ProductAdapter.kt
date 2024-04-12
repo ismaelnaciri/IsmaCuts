@@ -26,9 +26,6 @@ class ProductAdapter(
         }
     }
 
-    interface NavigationListener {
-        fun navigateToBookingFragment()
-    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProductViewHolder {
         val binding = ProductBinding.inflate(LayoutInflater.from(context), parent, false)

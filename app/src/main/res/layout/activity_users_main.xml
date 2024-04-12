@@ -10,6 +10,20 @@
         tools:context=".users.UsersMainActivity"
         android:background="?attr/colorBackground">
 
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/fragment_container_view_tag"
+            android:name="androidx.navigation.fragment.NavHostFragment"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:defaultNavHost="true"
+            app:layout_constraintBottom_toTopOf="@id/bottomMenuView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:navGraph="@navigation/users_navigation"
+            tools:layout="@layout/fragment_users_home" />
+
+
         <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/bottomMenuView"
             android:layout_width="0dp"
@@ -25,18 +39,6 @@
             app:layout_constraintTop_toBottomOf="@id/fragment_container_view_tag"
             app:menu="@menu/users_menu" />
 
-        <androidx.fragment.app.FragmentContainerView
-            android:id="@+id/fragment_container_view_tag"
-            android:name="androidx.navigation.fragment.NavHostFragment"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            app:defaultNavHost="true"
-            app:layout_constraintBottom_toTopOf="@id/bottomMenuView"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:navGraph="@navigation/users_navigation"
-            tools:layout="@layout/fragment_users_home" />
 
 
 

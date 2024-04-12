@@ -3,9 +3,11 @@ package cat.insvidreres.inf.ismacuts.users.booking
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import cat.insvidreres.inf.ismacuts.model.Professional
 import cat.insvidreres.inf.ismacuts.repository.Repository
 import cat.insvidreres.inf.ismacuts.utils.ServicesType
+import kotlinx.coroutines.launch
 
 class UserBookingViewModel : ViewModel() {
 
@@ -47,7 +49,9 @@ class UserBookingViewModel : ViewModel() {
         _days.value = mutableListOf<Days>()
 
         Repository.getDays {
-            _days.value = Repository.daysList
+            viewModelScope.launch {
+                _days.value = Repository.daysList
+            }
         }
     }
 
@@ -55,7 +59,9 @@ class UserBookingViewModel : ViewModel() {
         _hours.value = mutableListOf<Hour>()
 
         Repository.getHours(name) {
-            _hours.value = Repository.hoursList
+            viewModelScope.launch {
+                _hours.value = Repository.hoursList
+            }
         }
     }
 
@@ -69,13 +75,17 @@ class UserBookingViewModel : ViewModel() {
         _professionals.value = mutableListOf<Professional>()
 
         Repository.getProfesionals(serviceType) {
-            _professionals.value = Repository.professionalList
+            viewModelScope.launch {
+                _professionals.value = Repository.professionalList
+            }
         }
     }
 
     fun removeHourFromProfessional(name: String, valueToDelete: String) {
         Repository.updateProfessionalAvailableHours(name, valueToDelete) {
-            _hours.value = Repository.hoursList
+            viewModelScope.launch {
+                _hours.value = Repository.hoursList
+            }
         }
     }
 }
