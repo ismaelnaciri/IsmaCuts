@@ -5,13 +5,17 @@ plugins {
     id("com.google.gms.google-services")
 }
 
+//repositories {
+//    maven(url = "https://jitpack.io")
+//}
+
 android {
     namespace = "cat.insvidreres.inf.ismacuts"
     compileSdk = 34
 
     defaultConfig {
         applicationId = "cat.insvidreres.inf.ismacuts"
-        minSdk = 26
+        minSdk = 33
         targetSdk = 33
         versionCode = 1
         versionName = "1.0"
@@ -87,4 +91,7 @@ dependencies {
 
     //Google SignIn
     implementation("com.google.android.gms:play-services-auth:21.0.0")
+
+    //Charts
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 }

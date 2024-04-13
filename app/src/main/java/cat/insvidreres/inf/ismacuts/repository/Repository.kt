@@ -455,6 +455,7 @@ class Repository : ErrorHandler {
             }
         }
 
+        //TODO Make so that the admin can confirm or cancel a booking in their recycler
         fun getBookings(email: String, isProfessional: Boolean, onComplete: () -> Unit) {
 
             val db = Firebase.firestore

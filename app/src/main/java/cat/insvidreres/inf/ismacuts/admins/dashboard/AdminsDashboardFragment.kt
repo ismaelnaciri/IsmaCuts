@@ -1,60 +1,95 @@
 package cat.insvidreres.inf.ismacuts.admins.dashboard
 
+import android.graphics.Color
+import android.icu.text.SimpleDateFormat
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import cat.insvidreres.inf.ismacuts.R
+import cat.insvidreres.inf.ismacuts.databinding.FragmentAdminsDashboardBinding
+import com.github.mikephil.charting.data.*
+import com.github.mikephil.charting.charts.*
+import com.github.mikephil.charting.components.Description
+import com.github.mikephil.charting.utils.ColorTemplate
+import com.github.mikephil.*
+import com.github.mikephil.charting.components.XAxis
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
+import java.util.Calendar
+import java.util.Locale
+import kotlin.time.Duration.Companion.days
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [AdminsDashboardFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class AdminsDashboardFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
+    private lateinit var binding: FragmentAdminsDashboardBinding
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_admins_dashboard, container, false)
+        binding = FragmentAdminsDashboardBinding.inflate(inflater)
+        val chart = binding.chart
+        configureChart(chart)
+
+        val entries = mutableListOf<BarEntry>()
+
+        val calendar = Calendar.getInstance()
+        val daysInMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
+
+        val dateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        val daysArray = Array(daysInMonth) { i ->
+            calendar.set(Calendar.DAY_OF_MONTH, i + 1)
+            dateFormatter.format(calendar.time)
+        }
+        println("daysArray size ${daysArray.size}")
+        // Add your bar entries here
+        for (i in 0..daysArray.size) {
+            entries.add(BarEntry(i.toFloat(), (Math.random() * 1000).toFloat()))
+        }
+
+        val dataSet = BarDataSet(entries, "")
+        dataSet.colors = ColorTemplate.JOYFUL_COLORS.toList()
+        val barDataSet = BarData(dataSet)
+        barDataSet.barWidth = 0.7f
+        chart.data = barDataSet
+
+        chart.animateXY(1000, 2000)
+        chart.invalidate()
+
+        return binding.root
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment AdminsDashboardFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            AdminsDashboardFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
+    private fun configureChart(chart: BarChart) {
+        chart.description.isEnabled = false
+        chart.axisRight.setDrawLabels(false)
+        chart.axisLeft.axisMinimum = 0f
+        chart.axisLeft.axisLineWidth = 1f
+        chart.axisLeft.labelCount = 8
+
+        chart.setTouchEnabled(true)
+        chart.isDragEnabled = true
+        chart.setScaleEnabled(true)
+        chart.setPinchZoom(true)
+
+        val calendar = Calendar.getInstance()
+        val daysInMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
+
+        val dateFormatter = SimpleDateFormat("dd", Locale.getDefault())
+        val daysArray = Array(daysInMonth) { i ->
+            calendar.set(Calendar.DAY_OF_MONTH, i + 1)
+            dateFormatter.format(calendar.time)
+        }
+        // Set maximum visible bars
+        chart.setVisibleXRangeMaximum(5f)
+
+        // Zoom in to show only 5 or 6 bars at a time
+        val scale = (5f / 6f) * (daysArray.size / 5f) // Total bars / Visible bars
+        chart.zoom(scale, 1f, 0f, 0f)
+
+
+        val xAxisFormatter = IndexAxisValueFormatter(daysArray)
+        chart.xAxis.valueFormatter = xAxisFormatter
+        chart.xAxis.position = XAxis.XAxisPosition.BOTTOM
     }
 }
