@@ -5,7 +5,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cat.insvidreres.inf.ismacuts.repository.Repository
-import cat.insvidreres.inf.ismacuts.users.Booking
 import kotlinx.coroutines.launch
 
 class AdminsHomeViewModel : ViewModel() {
@@ -15,24 +14,13 @@ class AdminsHomeViewModel : ViewModel() {
 
     fun loadBookings(adminEmail: String) {
         _bookings.value?.clear()
+        _bookings.value = mutableListOf<AdminBooking>()
 
         Repository.getBookings(adminEmail, true) {
             viewModelScope.launch {
+                Repository.adminBookingsList.sortBy { it.day.day.toInt() }
                 println("adminsBookingList from viewModel | ${Repository.adminBookingsList}")
                 _bookings.value = Repository.adminBookingsList
-//                for (book in Repository.adminBookingsList) {
-//                    afterParse.add(
-//                        AdminBooking(
-//                            book.userEmail,
-//                            book.hour,
-//                            book.productName
-//                        )
-//                    )
-//                }
-
-//                if (afterParse.isNotEmpty()) {
-//                    _bookings.value = afterParse
-//                }
             }
         }
     }

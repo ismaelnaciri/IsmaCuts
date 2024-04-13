@@ -456,7 +456,7 @@ class Repository : ErrorHandler {
         }
 
         fun getBookings(email: String, isProfessional: Boolean, onComplete: () -> Unit) {
-            bookngsList.clear()
+
             val db = Firebase.firestore
 
             GlobalScope.launch(Dispatchers.IO) {
@@ -464,6 +464,9 @@ class Repository : ErrorHandler {
                     try {
                         db.collection("bookings").document(email).get()
                             .addOnSuccessListener { documentSnapshot ->
+                                bookngsList.clear()
+                                usersList.clear()
+                                professionalList.clear()
                                 val data = documentSnapshot.data
                                 if (data != null && data.containsKey("bookings")) {
                                     val bookings =
@@ -488,7 +491,7 @@ class Repository : ErrorHandler {
                                         val dayData = item["day"] as? Map<*, *>
                                         val day = dayData?.let {
                                             Days(
-                                                it["day"] as? Int ?: 1,
+                                                it["day"] as? Number ?: 0,
                                                 it["dayOfWeek"] as? String ?: ""
                                             )
                                         }
@@ -508,6 +511,7 @@ class Repository : ErrorHandler {
                                                         adminBookingsList.add(
                                                             AdminBooking(
                                                                 i.username,
+                                                                day,
                                                                 hour.hour,
                                                                 product.name
                                                             )
@@ -524,25 +528,23 @@ class Repository : ErrorHandler {
                                                         )
                                                     )
                                                 }
-                                                onComplete() // Call onComplete after processing bookings
+                                                onComplete()
                                             } else {
                                                 println("One of the elements is missing product or day or hour")
-                                                onComplete() // Call onComplete if any elements are missing
                                             }
                                         }
                                     }
                                 } else {
                                     println("No bookings found for professional with email: $email")
-                                    onComplete() // Call onComplete if no bookings found
                                 }
                             }
                     } catch (e: Exception) {
                         println("Error getting bookings: ${e.message}")
-                        onComplete() // Call onComplete in case of error
+                    } finally {
+                        println("adminBookings array $adminBookingsList")
                     }
                 } else {
                     println("Email is blank or null. $email")
-                    onComplete() // Call onComplete if email is blank or null
                 }
             }
         }
@@ -550,15 +552,13 @@ class Repository : ErrorHandler {
         fun getDetailsWithEmail(email: String, isProfessional: Boolean, onComplete: () -> Unit) {
             val db = Firebase.firestore
 
-            professionalList.clear()
-            usersList.clear()
-
             GlobalScope.launch(Dispatchers.IO) {
                 try {
                     if (isProfessional == false) {
                         db.collection("users").whereEqualTo("email", email)
                             .get()
                             .addOnSuccessListener {
+                                usersList.clear()
                                 for (user in it) {
                                     println("is email same as gotten? ${email == user["email"] as String}")
                                     usersList.add(
@@ -572,12 +572,13 @@ class Repository : ErrorHandler {
                                         )
                                     )
                                 }
-                                onComplete() // Call onComplete after populating usersList
+                                onComplete()
                             }
                     } else {
                         db.collection("professionals").whereEqualTo("email", email)
                             .get()
                             .addOnSuccessListener {
+                                professionalList.clear()
                                 for (professional in it) {
                                     var appHourArray = mutableListOf<Hour>()
                                     val appointmentArrayString =
@@ -601,16 +602,14 @@ class Repository : ErrorHandler {
                                     professionalList.add(pro)
                                     println("Professionals list: $professionalList")
                                 }
-                                onComplete() // Call onComplete after populating professionalList
+                                onComplete()
                             }
                     }
                 } catch (e: Exception) {
                     println("getDetailsWitEmail catch | ${e.message}")
-                    onComplete() // Call onComplete in case of error
                 }
             }
         }
-
 
 
         fun getDays(onComplete: () -> Unit) {

@@ -16,7 +16,9 @@ class AdminBookingAdapter(
         fun bind(adminBooking: AdminBooking, position: Int) {
             binding.bookingAdminIndexTV.text = position.toString()
             binding.adminBookRVUserName.text = adminBooking.userName
-            binding.adminBookingRVHourTV.text = adminBooking.hour
+            if (adminBooking.day.day != 0 && adminBooking.day.dayOfWeek != "") {
+                binding.adminBookingRVTimeTV.text = adminBooking.day.dayOfWeek + " " + adminBooking.day.day + "\n" +adminBooking.hour
+            }
             binding.adminBookingRVProductName.text = adminBooking.productName
         }
     }
