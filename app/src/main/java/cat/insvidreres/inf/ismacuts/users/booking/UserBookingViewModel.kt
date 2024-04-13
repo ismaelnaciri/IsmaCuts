@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cat.insvidreres.inf.ismacuts.model.Professional
 import cat.insvidreres.inf.ismacuts.repository.Repository
-import cat.insvidreres.inf.ismacuts.utils.ServicesType
 import kotlinx.coroutines.launch
 
 class UserBookingViewModel : ViewModel() {
@@ -74,7 +73,7 @@ class UserBookingViewModel : ViewModel() {
     fun loadProfessionals(serviceType: String) {
         _professionals.value = mutableListOf<Professional>()
 
-        Repository.getProfesionals(serviceType) {
+        Repository.getProfessionals(serviceType) {
             viewModelScope.launch {
                 _professionals.value = Repository.professionalList
             }

@@ -2,6 +2,7 @@ package cat.insvidreres.inf.ismacuts.repository
 
 import android.net.Uri
 import android.util.Log
+import cat.insvidreres.inf.ismacuts.admins.home.AdminBooking
 import cat.insvidreres.inf.ismacuts.model.Professional
 import cat.insvidreres.inf.ismacuts.model.User
 import cat.insvidreres.inf.ismacuts.users.Booking
@@ -43,18 +44,18 @@ class Repository : ErrorHandler {
         var professionalList = mutableListOf<Professional>()
         var servicesList = mutableListOf<Service>()
         var productsList = mutableListOf<Product>()
+        var usersList = mutableListOf<User>()
         var bookngsList = mutableListOf<Booking>()
+        var adminBookingsList = mutableListOf<AdminBooking>()
 
         fun insertUser(user: User) {
             user.password = encryptPassword(user.password)
 
-            FirebaseAuth.getInstance()
-                .createUserWithEmailAndPassword(user.email, user.password)
+            FirebaseAuth.getInstance().createUserWithEmailAndPassword(user.email, user.password)
                 .addOnCompleteListener {
                     if (it.isSuccessful) {
                         addItemToCollection(
-                            "users",
-                            hashMapOf(
+                            "users", hashMapOf(
                                 "username" to user.username,
                                 "email" to user.email,
                                 "password" to user.password,
@@ -68,37 +69,46 @@ class Repository : ErrorHandler {
             Log.d("User fields test", "email | ${user.email}  |  password ${user.password}")
         }
 
-        //TODO Change so that it kn ows if email is admin
         //TODO update signIn method so that it detects somehow when to insert into users and when into professionals
-        fun signIn(email: String, password: String): Boolean {
-            try {
-                FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
-                    .addOnFailureListener { e ->
-                        Log.d("login failure", e.message.toString())
+        fun signIn(email: String, password: String, onComplete: (String) -> Unit) {
+            getProfessionals("") {
+                try {
+                    if (professionalList.any { it.email == email }) {
+                        FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
+                            .addOnFailureListener { e ->
+                                Log.d("login failure", e.message.toString())
+                            }
+                        println("IT WAS professional $email")
+                        onComplete("PROFESSIONAL")
+                    } else {
+                        FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
+                            .addOnFailureListener { e ->
+                                Log.d("login failure", e.message.toString())
+                            }
+                        println("IT WAS user $email")
+                        onComplete("USER")
                     }
-            } catch (e: Exception) {
-                Log.e("Error signIn", e.message.toString())
-                return false
+
+                } catch (e: Exception) {
+                    Log.e("Error signIn", e.message.toString())
+                } finally {
+                    println("PROFESSIONALSLIST  $professionalList")
+                }
+
             }
-            return true
         }
 
         private fun addItemToCollection(collection: String, item: Any, docName: String = "") {
             val db = Firebase.firestore
 
             if (item != null && docName == "") {
-                db.collection(collection)
-                    .add(item)
-                    .addOnFailureListener { e ->
-                        Log.d("Firestore addItemToCollection", e.message.toString())
-                    }
+                db.collection(collection).add(item).addOnFailureListener { e ->
+                    Log.d("Firestore addItemToCollection", e.message.toString())
+                }
             } else if (item != null && docName != "") {
-                db.collection(collection)
-                    .document(docName)
-                    .set(item)
-                    .addOnFailureListener { e ->
-                        Log.d("Firestore addItemToCollection", e.message.toString())
-                    }
+                db.collection(collection).document(docName).set(item).addOnFailureListener { e ->
+                    Log.d("Firestore addItemToCollection", e.message.toString())
+                }
             } else {
                 Log.d("Firestore else", "Wtf is this shit not working")
             }
@@ -107,93 +117,115 @@ class Repository : ErrorHandler {
         fun addUsersToList(onComplete: () -> Unit) {
             val db = Firebase.firestore
 
-            db.collection("users")
-                .get()
-                .addOnSuccessListener {
-                    val list = mutableListOf<User>()
-                    for (i in it) {
-                        val user = User(
-                            i.data["username"].toString(),
-                            i.data["email"].toString(),
-                            i.data["password"].toString(),
-                            i.data["admin"].toString().toBoolean(),
-                            "",
-                            i.data["img"].toString()
-                        )
-                        list.add(user)
-                    }
+            db.collection("users").get().addOnSuccessListener {
+                val list = mutableListOf<User>()
+                for (i in it) {
+                    val user = User(
+                        i.data["username"].toString(),
+                        i.data["email"].toString(),
+                        i.data["password"].toString(),
+                        i.data["admin"].toString().toBoolean(),
+                        "",
+                        i.data["img"].toString()
+                    )
+                    list.add(user)
+                }
 
-                    recyclerList = list
-                    onComplete()
-                }
-                .addOnFailureListener { e ->
-                    Log.w("Firestore", e.message.toString())
-                }
+                recyclerList = list
+                onComplete()
+            }.addOnFailureListener { e ->
+                Log.w("Firestore", e.message.toString())
+            }
         }
 
         //Get professionals and their hours available
-        fun getProfesionals(service: String, onComplete: () -> Unit) {
+        fun getProfessionals(service: String, onComplete: () -> Unit) {
             val db = Firebase.firestore
 
             professionalList.clear()
 
             GlobalScope.launch(Dispatchers.IO) {
-                db.collection("professionals")
-                    .whereArrayContains("services", service)
-                    .get()
-                    .addOnSuccessListener {
-                        for (professional in it) {
-                            var appHourArray = mutableListOf<Hour>()
-                            val appointmentArrayString =
-                                professional.data["appointments"] as MutableList<String>
+                if (!service.isNullOrEmpty()) {
+                    db.collection("professionals").whereArrayContains("services", service).get()
+                        .addOnSuccessListener {
+                            for (professional in it) {
+                                var appHourArray = mutableListOf<Hour>()
+                                val appointmentArrayString =
+                                    professional.data["appointments"] as MutableList<String>
 
-                            for (hour in appointmentArrayString) {
-                                appHourArray.add(Hour(hour))
+                                for (hour in appointmentArrayString) {
+                                    appHourArray.add(Hour(hour))
+                                }
+
+                                val pro = Professional(
+                                    professional.data["name"].toString(),
+                                    professional.data["email"].toString(),
+                                    professional.data["password"].toString(),
+                                    professional.data["reviews"] as MutableList<Number>,
+                                    professional.data["services"] as MutableList<String>,
+                                    appHourArray,
+                                    professional.data["updatedTime"] as Number,
+                                    "",
+                                    professional.data["img"].toString(),
+                                )
+                                professionalList.add(pro)
+                                println("Professionals list: $professionalList")
                             }
 
-                            val pro = Professional(
-                                professional.data["name"].toString(),
-                                professional.data["email"].toString(),
-                                professional.data["password"].toString(),
-                                professional.data["reviews"] as MutableList<Number>,
-                                professional.data["services"] as MutableList<String>,
-                                appHourArray,
-                                professional.data["updatedTime"] as Number,
-                                "",
-                                professional.data["img"].toString(),
-                            )
-                            professionalList.add(pro)
-                            println("Professionals list: $professionalList")
+                            onComplete()
+                        }.addOnFailureListener {
+                            println("Error getting the professionals!!! $it")
                         }
+                } else {
+                    db.collection("professionals").get()
+                        .addOnSuccessListener {
+                            for (professional in it) {
+                                var appHourArray = mutableListOf<Hour>()
+                                val appointmentArrayString =
+                                    professional.data["appointments"] as MutableList<String>
 
-                        onComplete()
-                    }
-                    .addOnFailureListener {
-                        println("Error getting the professionals!!! $it")
-                    }
+                                for (hour in appointmentArrayString) {
+                                    appHourArray.add(Hour(hour))
+                                }
+
+                                val pro = Professional(
+                                    professional.data["name"].toString(),
+                                    professional.data["email"].toString(),
+                                    professional.data["password"].toString(),
+                                    professional.data["reviews"] as MutableList<Number>,
+                                    professional.data["services"] as MutableList<String>,
+                                    appHourArray,
+                                    professional.data["updatedTime"] as Number,
+                                    "",
+                                    professional.data["img"].toString(),
+                                )
+                                professionalList.add(pro)
+                                println("Professionals list: $professionalList")
+                            }
+
+                            onComplete()
+                        }.addOnFailureListener {
+                            println("Error getting the professionals!!! $it")
+                        }
+                }
+
             }
         }
 
         fun updateProfessionalAvailableHours(
-            name: String,
-            valueToDelete: String,
-            onComplete: () -> Unit
+            name: String, valueToDelete: String, onComplete: () -> Unit
         ) {
             val db = Firebase.firestore
 
             GlobalScope.launch(Dispatchers.IO) {
-                db.collection("professionals")
-                    .whereEqualTo("name", name)
-                    .get()
+                db.collection("professionals").whereEqualTo("name", name).get()
                     .addOnSuccessListener {
                         for (professional in it) {
                             val array = professional.data["appointments"] as MutableList<String>
                             array.remove(valueToDelete)
 
-                            db.collection("professionals")
-                                .document(professional.id)
-                                .update("appointments", array)
-                                .addOnSuccessListener {
+                            db.collection("professionals").document(professional.id)
+                                .update("appointments", array).addOnSuccessListener {
 
                                     hoursList.remove(Hour(valueToDelete))
                                     onComplete()
@@ -218,28 +250,23 @@ class Repository : ErrorHandler {
 
                 var hoursReset = getHours()
 
-                db.collection("professionals")
-                    .get()
-                    .addOnSuccessListener { querySnapshot ->
-                        for (professional in querySnapshot) {
-                            // Check if it's a new day since the last update
-                            val updatedTime =
-                                professional.get("updatedTime")?.toString()?.toLong() ?: 0
-                            if (updatedTime < dayStartTime && updatedTime.toInt() != 0 && hoursReset.isNotEmpty()) {
-                                professional.data["appointments"] = hoursReset
+                db.collection("professionals").get().addOnSuccessListener { querySnapshot ->
+                    for (professional in querySnapshot) {
+                        // Check if it's a new day since the last update
+                        val updatedTime =
+                            professional.get("updatedTime")?.toString()?.toLong() ?: 0
+                        if (updatedTime < dayStartTime && updatedTime.toInt() != 0 && hoursReset.isNotEmpty()) {
+                            professional.data["appointments"] = hoursReset
 
-                                db.collection("professionals")
-                                    .document(professional.id)
-                                    .update(
-                                        "appointments", hoursReset,
-                                        "updatedTime", currentTime
-                                    )
-                            } else {
-                                println("professional ${professional.data["name"]} has already been updated")
-                            }
+                            db.collection("professionals").document(professional.id).update(
+                                "appointments", hoursReset, "updatedTime", currentTime
+                            )
+                        } else {
+                            println("professional ${professional.data["name"]} has already been updated")
                         }
-                        onComplete()
                     }
+                    onComplete()
+                }
             }
         }
 
@@ -257,9 +284,7 @@ class Repository : ErrorHandler {
         suspend fun getHours(): List<String> = suspendCoroutine { continuation ->
             val db = Firebase.firestore
 
-            db.collection("hours")
-                .document("always")
-                .get()
+            db.collection("hours").document("always").get()
                 .addOnSuccessListener { documentSnapshot ->
                     val hours = documentSnapshot.data?.get("hours") as List<String>?
                     val hoursList = hours?.map { it } ?: emptyList()
@@ -269,8 +294,7 @@ class Repository : ErrorHandler {
                         println("Array of hours is empty gggggggggggggggggg  | $hoursList")
                     }
                     continuation.resume(hoursList)
-                }
-                .addOnFailureListener { e ->
+                }.addOnFailureListener { e ->
                     continuation.resumeWithException(e)
                 }
         }
@@ -282,9 +306,7 @@ class Repository : ErrorHandler {
 
             GlobalScope.launch(Dispatchers.IO) {
                 try {
-                    db.collection("professionals")
-                        .whereEqualTo("name", name)
-                        .get()
+                    db.collection("professionals").whereEqualTo("name", name).get()
                         .addOnSuccessListener { list ->
                             for (professional in list) {
                                 val hours = professional.data["appointments"] as MutableList<String>
@@ -315,45 +337,39 @@ class Repository : ErrorHandler {
 
             GlobalScope.launch(Dispatchers.IO) {
                 if (serviceType.isEmpty()) {
-                    db.collection("services")
-                        .document("always")
-                        .get()
-                        .addOnSuccessListener {
-                            val products = it.data?.get("services") as MutableList<Map<String, Any>>
-                            for (service in products) {
-                                productsList.add(
-                                    Product(
-                                        service["name"].toString(),
-                                        service["img"].toString(),
-                                        service["serviceType"].toString(),
-                                    )
+                    db.collection("services").document("always").get().addOnSuccessListener {
+                        val products = it.data?.get("services") as MutableList<Map<String, Any>>
+                        for (service in products) {
+                            productsList.add(
+                                Product(
+                                    service["name"].toString(),
+                                    service["img"].toString(),
+                                    service["serviceType"].toString(),
                                 )
-                            }
-
-                            onComplete()
+                            )
                         }
+
+                        onComplete()
+                    }
                 } else {
-                    db.collection("services")
-                        .document("always")
-                        .get()
-                        .addOnSuccessListener {
-                            val products = it.data?.get("services") as MutableList<Map<String, Any>>
-                            if (products != null) {
-                                for (service in products) {
-                                    if (service["serviceType"] as String == serviceType) {
-                                        productsList.add(
-                                            Product(
-                                                service["name"] as String,
-                                                service["img"] as String,
-                                                service["serviceType"] as String,
-                                            )
+                    db.collection("services").document("always").get().addOnSuccessListener {
+                        val products = it.data?.get("services") as MutableList<Map<String, Any>>
+                        if (products != null) {
+                            for (service in products) {
+                                if (service["serviceType"] as String == serviceType) {
+                                    productsList.add(
+                                        Product(
+                                            service["name"] as String,
+                                            service["img"] as String,
+                                            service["serviceType"] as String,
                                         )
-                                    }
+                                    )
                                 }
                             }
-                            onComplete()
-                            println("ProductsList: $productsList")
                         }
+                        onComplete()
+                        println("ProductsList: $productsList")
+                    }
                 }
             }
         }
@@ -363,149 +379,239 @@ class Repository : ErrorHandler {
             servicesList.clear()
 
             GlobalScope.launch(Dispatchers.IO) {
-                db.collection("services")
-                    .document("servicesTypes")
-                    .get()
-                    .addOnSuccessListener {
-                        val services = it.data?.get("services") as MutableList<Map<String, Any>>
+                db.collection("services").document("servicesTypes").get().addOnSuccessListener {
+                    val services = it.data?.get("services") as MutableList<Map<String, Any>>
 
-                        for (service in services) {
-                            servicesList.add(
-                                Service(
-                                    service["name"].toString(),
-                                    service["src"].toString().lowercase(Locale.ROOT)
-                                        .replace(" ", "_"),
-                                    service["serviceType"].toString()
-                                )
+                    for (service in services) {
+                        servicesList.add(
+                            Service(
+                                service["name"].toString(),
+                                service["src"].toString().lowercase(Locale.ROOT)
+                                    .replace(" ", "_"),
+                                service["serviceType"].toString()
                             )
-                        }
-
-                        onComplete()
-                        println("ServicesList: $servicesList")
+                        )
                     }
+
+                    onComplete()
+                    println("ServicesList: $servicesList")
+                }
             }
         }
 
         fun insertBooking(
-            booking: Booking,
-            onComplete: () -> Unit,
-            onError: (error: String) -> Unit
+            booking: Booking, onComplete: () -> Unit, onError: (error: String) -> Unit
         ) {
             val db = Firebase.firestore
 
-            try {
-                val bookMap = mutableMapOf<String, Any>()
-                bookMap["userEmail"] = booking.userEmail
-                bookMap["product"] = booking.product
-                bookMap["professionalEmail"] = booking.professionalEmail
-                bookMap["day"] = booking.days
-                bookMap["hour"] = booking.hour
+            //TODO get username with user email
 
-                db.collection("bookings")
-                    .document(booking.professionalEmail)
-                    .get()
-                    .addOnSuccessListener {
-                        println("inside first get")
-                        val test = it.data?.get("bookings")
-                        //If test is null means document doesn't exist
-                        //Returns the fields of the document as a Map or null if the document doesn't exist
-                        if (test != null) {
-                            val bookings = test as MutableList<Map<String, Any>>
-                            bookings.add(bookMap)
+            GlobalScope.launch(Dispatchers.IO) {
+                try {
+                    val bookMap = mutableMapOf<String, Any>()
+                    bookMap["userEmail"] = booking.userEmail
+                    bookMap["product"] = booking.product
+                    bookMap["professionalEmail"] = booking.professionalEmail
+                    bookMap["day"] = booking.days
+                    bookMap["hour"] = booking.hour
 
-                            val toFirestore = mutableMapOf<String, Any>()
-                            toFirestore["bookings"] = bookings
+                    db.collection("bookings").document(booking.professionalEmail).get()
+                        .addOnSuccessListener {
+                            val existingBookings = it.data
+                            //If test is null means document doesn't exist
+                            //Returns the fields of the document as a Map or null if the document doesn't exist
+                            if (existingBookings != null && existingBookings.containsKey("bookings")) {
+                                val bookings =
+                                    existingBookings["bookings"] as MutableList<Map<String, Any>>
+                                bookings.add(bookMap)
 
-                            db.collection("bookings")
-                                .document(booking.professionalEmail)
-                                .update(toFirestore)
-                                .addOnSuccessListener {
-                                    println("inside first update")
-                                    println("Insert done, the document already EXISTED!!")
-                                }
-                                .addOnFailureListener {
-                                    println("Error inserting, whilst the document existed  |  ${it.message}")
-                                }
+                                db.collection("bookings").document(booking.professionalEmail)
+                                    .update("bookings", bookings).addOnSuccessListener {
+                                        println("Insert done, the document already EXISTED!!")
+                                    }.addOnFailureListener {
+                                        println("Error inserting, whilst the document existed  |  ${it.message}")
+                                    }
 
-                        } else {
-                            val toFirestore = mutableMapOf<String, Any>()
-                            toFirestore["bookings"] = bookMap
+                            } else {
+                                val newBookings = mutableMapOf<String, Any>()
+                                newBookings["bookings"] = mutableListOf(bookMap)
 
-                            db.collection("bookings")
-                                .document(booking.professionalEmail)
-                                .set(toFirestore)
-                                .addOnSuccessListener {
-                                    println("inside else set")
-                                    println("Inserted correctly. The document dod not exist")
-                                }
-                                .addOnFailureListener {
-                                    println("Error inserting, whilst the document dod not exist  |  ${it.message}")
-                                }
+                                db.collection("bookings").document(booking.professionalEmail)
+                                    .set(newBookings).addOnSuccessListener {
+                                        println("Inserted correctly. The document dod not exist")
+                                    }.addOnFailureListener {
+                                        println("Error inserting, whilst the document dod not exist  |  ${it.message}")
+                                    }
+                            }
+                        }.addOnFailureListener {
+                            println("Error fetching document: ${it.message}")
                         }
-                    }
-                    .addOnFailureListener {
-                        val toFirestore = mutableMapOf<String, Any>()
-                        toFirestore["bookings"] = bookMap
 
-                        db.collection("bookings")
-                            .document(booking.professionalEmail)
-                            .set(toFirestore)
-                            .addOnSuccessListener {
-                                println("inside failure set")
-                                println("Inserted correctly. The document dod not exist")
-                            }
-                            .addOnFailureListener {
-                                println("Error inserting, whilst the document dod not exist  |  ${it.message}")
-                            }
-                    }
-
-                onComplete()
-            } catch (e: Exception) {
-                println("ERROR in insertBooking wtf  |  ${e.message}")
-                onError(e.message.toString())
+                    onComplete()
+                } catch (e: Exception) {
+                    println("ERROR in insertBooking wtf  |  ${e.message}")
+                    onError(e.message.toString())
+                }
             }
         }
 
-        fun getBookings(professionalEmail: String, onComplete: () -> Unit) {
+        fun getBookings(email: String, isProfessional: Boolean, onComplete: () -> Unit) {
             bookngsList.clear()
             val db = Firebase.firestore
 
             GlobalScope.launch(Dispatchers.IO) {
-                if (professionalEmail != null) {
+                if (email.isNotBlank()) {
                     try {
-                        db.collection("bookings")
-                            .document(professionalEmail)
-                            .get()
-                            .addOnSuccessListener {
-                                val test = it.data?.get("bookings")
+                        db.collection("bookings").document(email).get()
+                            .addOnSuccessListener { documentSnapshot ->
+                                val data = documentSnapshot.data
+                                if (data != null && data.containsKey("bookings")) {
+                                    val bookings =
+                                        data["bookings"] as? MutableList<Map<String, Any>>
 
-                                if (test != null) {
-                                    val bookings = test as MutableList<Map<String, Any>>
+                                    println("bookings for $email | $bookings")
 
-                                    for (item in bookings) {
-                                        bookngsList.add(
-                                            Booking(
-                                                item["userEmail"].toString(),
-                                                item["products"] as Product,
-                                                item["professionalEmail"].toString(),
-                                                item["day"] as Days,
-                                                item["hour"] as Hour
+                                    bookings?.forEach { item ->
+                                        val userEmail = item["userEmail"].toString()
+
+                                        val productData = item["product"] as? Map<*, *>
+                                        val product = productData?.let {
+                                            Product(
+                                                it["name"] as? String ?: "",
+                                                it["serviceType"] as? String ?: "",
+                                                it["img"] as? String ?: ""
                                             )
-                                        )
+                                        }
+
+                                        val professionalEmail = item["professionalEmail"].toString()
+
+                                        val dayData = item["day"] as? Map<*, *>
+                                        val day = dayData?.let {
+                                            Days(
+                                                it["day"] as? Int ?: 1,
+                                                it["dayOfWeek"] as? String ?: ""
+                                            )
+                                        }
+
+                                        val hourData = item["hour"] as? Map<*, *>
+                                        val hour = hourData?.let {
+                                            Hour(
+                                                it["hour"] as? String ?: ""
+                                            )
+                                        }
+
+                                        getDetailsWithEmail(userEmail, !isProfessional) { //To get user data
+                                            if (product != null && day != null && hour != null) {
+                                                println("usersList $usersList")
+                                                if (isProfessional) {
+                                                    for (i in usersList) {
+                                                        adminBookingsList.add(
+                                                            AdminBooking(
+                                                                i.username,
+                                                                hour.hour,
+                                                                product.name
+                                                            )
+                                                        )
+                                                    }
+                                                } else {
+                                                    bookngsList.add(
+                                                        Booking(
+                                                            userEmail,
+                                                            product,
+                                                            professionalEmail,
+                                                            day,
+                                                            hour
+                                                        )
+                                                    )
+                                                }
+                                                onComplete() // Call onComplete after processing bookings
+                                            } else {
+                                                println("One of the elements is missing product or day or hour")
+                                                onComplete() // Call onComplete if any elements are missing
+                                            }
+                                        }
                                     }
                                 } else {
-                                    println("bookings did not exist")
+                                    println("No bookings found for professional with email: $email")
+                                    onComplete() // Call onComplete if no bookings found
                                 }
-
-                                onComplete()
                             }
-
                     } catch (e: Exception) {
-                        println("Error getting bookings | ${e.message}")
+                        println("Error getting bookings: ${e.message}")
+                        onComplete() // Call onComplete in case of error
                     }
+                } else {
+                    println("Email is blank or null. $email")
+                    onComplete() // Call onComplete if email is blank or null
                 }
             }
         }
+
+        fun getDetailsWithEmail(email: String, isProfessional: Boolean, onComplete: () -> Unit) {
+            val db = Firebase.firestore
+
+            professionalList.clear()
+            usersList.clear()
+
+            GlobalScope.launch(Dispatchers.IO) {
+                try {
+                    if (isProfessional == false) {
+                        db.collection("users").whereEqualTo("email", email)
+                            .get()
+                            .addOnSuccessListener {
+                                for (user in it) {
+                                    println("is email same as gotten? ${email == user["email"] as String}")
+                                    usersList.add(
+                                        User(
+                                            user["username"] as String,
+                                            user["email"] as String,
+                                            user["password"] as String,
+                                            user["admin"] as Boolean,
+                                            "",
+                                            user["img"] as String
+                                        )
+                                    )
+                                }
+                                onComplete() // Call onComplete after populating usersList
+                            }
+                    } else {
+                        db.collection("professionals").whereEqualTo("email", email)
+                            .get()
+                            .addOnSuccessListener {
+                                for (professional in it) {
+                                    var appHourArray = mutableListOf<Hour>()
+                                    val appointmentArrayString =
+                                        professional.data["appointments"] as MutableList<String>
+
+                                    for (hour in appointmentArrayString) {
+                                        appHourArray.add(Hour(hour))
+                                    }
+
+                                    val pro = Professional(
+                                        professional.data["name"].toString(),
+                                        professional.data["email"].toString(),
+                                        professional.data["password"].toString(),
+                                        professional.data["reviews"] as MutableList<Number>,
+                                        professional.data["services"] as MutableList<String>,
+                                        appHourArray,
+                                        professional.data["updatedTime"] as Number,
+                                        "",
+                                        professional.data["img"].toString(),
+                                    )
+                                    professionalList.add(pro)
+                                    println("Professionals list: $professionalList")
+                                }
+                                onComplete() // Call onComplete after populating professionalList
+                            }
+                    }
+                } catch (e: Exception) {
+                    println("getDetailsWitEmail catch | ${e.message}")
+                    onComplete() // Call onComplete in case of error
+                }
+            }
+        }
+
+
 
         fun getDays(onComplete: () -> Unit) {
             daysList.clear()
@@ -547,26 +653,22 @@ class Repository : ErrorHandler {
 
             val db = Firebase.firestore
 
-            db.collection("users")
-                .get()
-                .addOnSuccessListener {
-                    for (i in it) {
+            db.collection("users").get().addOnSuccessListener {
+                for (i in it) {
 //                        imagesList.add(i.data["img"].toString())
-                    }
                 }
+            }
 
             storageRef = FirebaseStorage.getInstance().reference
             val testReference = storageRef.child("Images/Wireframe-1.jpg")
 
             val ONE_MEGABYTE: Long = 1024 * 1024
 
-            testReference.getBytes(ONE_MEGABYTE)
-                .addOnSuccessListener { data ->
+            testReference.getBytes(ONE_MEGABYTE).addOnSuccessListener { data ->
 
-                }
-                .addOnFailureListener { e ->
-                    Log.d("ERROR Reading storage", e.message.toString())
-                }
+            }.addOnFailureListener { e ->
+                Log.d("ERROR Reading storage", e.message.toString())
+            }
         }
 
         fun updateUser(oldUser: User, newUser: User, imgUri: Uri?, onComplete: () -> Unit) {
@@ -577,9 +679,7 @@ class Repository : ErrorHandler {
 
             storageRef = FirebaseStorage.getInstance().reference.child("/Images")
 
-            if (oldUser.email != newUser.email
-                && oldUser.img != "https://firebasestorage.googleapis.com/v0/b/ismacuts-a6d41.appspot.com/o/Images%2Fplaceholder_pfp.jpg?alt=media&token=51075713-0a43-48a0-922e-426d75f85552"
-            ) {
+            if (oldUser.email != newUser.email && oldUser.img != "https://firebasestorage.googleapis.com/v0/b/ismacuts-a6d41.appspot.com/o/Images%2Fplaceholder_pfp.jpg?alt=media&token=51075713-0a43-48a0-922e-426d75f85552") {
                 storageRef.child(oldUser.email + "-pfp").delete()
             }
             storageRef = storageRef.child(newUser.email + "-pfp")
@@ -594,85 +694,74 @@ class Repository : ErrorHandler {
 
                             Log.i("newUser.img", newUser.img)
 
-                            db.collection("users")
-                                .whereEqualTo("email", oldUser.email)
-                                .get()
+                            db.collection("users").whereEqualTo("email", oldUser.email).get()
                                 .addOnSuccessListener { docs ->
                                     for (doc in docs) {
-                                        db.collection("users")
-                                            .document(doc.id)
-                                            .update(
-                                                hashMapOf<String, Any>(
-                                                    "username" to newUser.username,
-                                                    "email" to newUser.email,
-                                                    "password" to newUser.password,
-                                                    "admin" to newUser.admin,
-                                                    "img" to newUser.img,
-                                                    "id" to newUser.id
-                                                )
+                                        db.collection("users").document(doc.id).update(
+                                            hashMapOf<String, Any>(
+                                                "username" to newUser.username,
+                                                "email" to newUser.email,
+                                                "password" to newUser.password,
+                                                "admin" to newUser.admin,
+                                                "img" to newUser.img,
+                                                "id" to newUser.id
                                             )
-                                            .addOnSuccessListener {
-                                                if (oldUser.email != newUser.email) {
-                                                    val credential: AuthCredential =
-                                                        EmailAuthProvider.getCredential(
-                                                            oldUser.email,
-                                                            oldUser.password
-                                                        )
-                                                    FirebaseAuth.getInstance().currentUser?.reauthenticate(
-                                                        credential
+                                        ).addOnSuccessListener {
+                                            if (oldUser.email != newUser.email) {
+                                                val credential: AuthCredential =
+                                                    EmailAuthProvider.getCredential(
+                                                        oldUser.email, oldUser.password
                                                     )
-                                                        ?.addOnSuccessListener { task ->
-                                                            FirebaseAuth.getInstance().currentUser?.verifyBeforeUpdateEmail(
-                                                                newUser.email
+                                                FirebaseAuth.getInstance().currentUser?.reauthenticate(
+                                                    credential
+                                                )?.addOnSuccessListener { task ->
+                                                    FirebaseAuth.getInstance().currentUser?.verifyBeforeUpdateEmail(
+                                                        newUser.email
+                                                    )?.addOnSuccessListener {
+                                                        Log.i(
+                                                            "email update",
+                                                            "Email updated successfully"
+                                                        )
+
+                                                        val credential: AuthCredential =
+                                                            EmailAuthProvider.getCredential(
+                                                                oldUser.email,
+                                                                oldUser.password
+                                                            )
+                                                        FirebaseAuth.getInstance().currentUser?.reauthenticate(
+                                                            credential
+                                                        )?.addOnSuccessListener {
+                                                            FirebaseAuth.getInstance().currentUser?.updatePassword(
+                                                                newUser.password
                                                             )
                                                                 ?.addOnSuccessListener {
                                                                     Log.i(
-                                                                        "email update",
-                                                                        "Email updated successfully"
-                                                                    )
-
-                                                                    val credential: AuthCredential =
-                                                                        EmailAuthProvider.getCredential(
-                                                                            oldUser.email,
-                                                                            oldUser.password
-                                                                        )
-                                                                    FirebaseAuth.getInstance().currentUser?.reauthenticate(
-                                                                        credential
-                                                                    )
-                                                                        ?.addOnSuccessListener {
-                                                                            FirebaseAuth.getInstance().currentUser?.updatePassword(
-                                                                                newUser.password
-                                                                            )
-                                                                                ?.addOnSuccessListener {
-                                                                                    Log.i(
-                                                                                        "Passw updated",
-                                                                                        "Pass updates successfully"
-                                                                                    )
-                                                                                }
-                                                                        }
-
-
-
-                                                                    Log.i(
-                                                                        "Credentials",
-                                                                        "Auth credentials updated? check"
+                                                                        "Passw updated",
+                                                                        "Pass updates successfully"
                                                                     )
                                                                 }
                                                         }
+
+
+
+                                                        Log.i(
+                                                            "Credentials",
+                                                            "Auth credentials updated? check"
+                                                        )
+                                                    }
                                                 }
                                             }
+                                        }
                                     }
-                                }
-                                .addOnFailureListener { exception ->
+                                }.addOnFailureListener { exception ->
                                     Log.e(
                                         "Error in getting the users (update)",
                                         exception.message.toString()
                                     )
                                 }
+                        }.addOnFailureListener { exception ->
+                            Log.e("url download error", exception.message.toString())
                         }
-                            .addOnFailureListener { exception ->
-                                Log.e("url download error", exception.message.toString())
-                            }
                     } else {
                         Log.e("storage upload", "Error uploading file gg")
                     }
@@ -684,27 +773,22 @@ class Repository : ErrorHandler {
             FirebaseAuth.getInstance().signOut()
             FirebaseAuth.getInstance().signInWithEmailAndPassword(user.email, user.password)
                 .addOnSuccessListener { authResult ->
-                    authResult.user?.delete()
-                        ?.addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
-                                onComplete()
-                            } else {
-                                // Failed to delete user
-                                Log.e("deleteUser", "Failed to delete user: ${task.exception}")
-                            }
+                    authResult.user?.delete()?.addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            onComplete()
+                        } else {
+                            // Failed to delete user
+                            Log.e("deleteUser", "Failed to delete user: ${task.exception}")
                         }
-                }
-                .addOnFailureListener { exception ->
+                    }
+                }.addOnFailureListener { exception ->
                     Log.e("deleteUser", "Failed to sign in: ${exception.message}")
                 }
 
             val db = Firebase.firestore
 
-            db.collection("users")
-                .whereEqualTo("email", user.email)
-                .whereEqualTo("username", user.username)
-                .get()
-                .addOnSuccessListener { docs ->
+            db.collection("users").whereEqualTo("email", user.email)
+                .whereEqualTo("username", user.username).get().addOnSuccessListener { docs ->
                     for (doc in docs) {
                         db.collection("users").document(doc.id).delete()
                     }
@@ -724,14 +808,10 @@ class Repository : ErrorHandler {
         suspend fun getLastDocumentYear(): Int? {
             val firestore = Firebase.firestore
             return try {
-                val querySnapshot = firestore.collection("days")
-                    .orderBy(
-                        com.google.firebase.firestore.FieldPath.documentId(),
-                        Query.Direction.DESCENDING
-                    )
-                    .limit(1)
-                    .get()
-                    .await()
+                val querySnapshot = firestore.collection("days").orderBy(
+                    com.google.firebase.firestore.FieldPath.documentId(),
+                    Query.Direction.DESCENDING
+                ).limit(1).get().await()
 
                 querySnapshot.documents.firstOrNull()?.id?.toIntOrNull()
             } catch (e: Exception) {
@@ -760,16 +840,14 @@ class Repository : ErrorHandler {
                     val dayName = SimpleDateFormat("EEEE", Locale.getDefault()).format(date)
 
                     val dayMap = mapOf(
-                        "dayNumber" to dayNumber,
-                        "dayName" to dayName
+                        "dayNumber" to dayNumber, "dayName" to dayName
                     )
 
                     monthDays.add(dayMap)
                 }
 
                 val monthMap = mapOf(
-                    "month" to monthName,
-                    "days" to monthDays
+                    "month" to monthName, "days" to monthDays
                 )
 
                 daysOfYear.add(monthMap)
@@ -784,8 +862,7 @@ class Repository : ErrorHandler {
                 val daysCollection = firestore.collection("days")
                 val documentRef = daysCollection.document(year.toString())
 
-                documentRef.set(mapOf("data" to days))
-                    .await()
+                documentRef.set(mapOf("data" to days)).await()
 
                 println("Days for year $year saved successfully to Firestore.")
             } catch (e: Exception) {
@@ -796,10 +873,8 @@ class Repository : ErrorHandler {
         suspend fun getDatesFromFirestore(year: Int): List<Map<String, Any>> {
             val firestore = Firebase.firestore
             return try {
-                val documentSnapshot = firestore.collection("days")
-                    .document(year.toString())
-                    .get()
-                    .await()
+                val documentSnapshot =
+                    firestore.collection("days").document(year.toString()).get().await()
 
                 val data =
                     documentSnapshot.data?.get("data") as? List<Map<String, Any>> ?: emptyList()
@@ -813,9 +888,7 @@ class Repository : ErrorHandler {
                         val dayName =
                             day["dayName"] as? String ?: "" // Default value or handle appropriately
                         mapOf(
-                            "month" to month,
-                            "dayNumber" to dayNumber,
-                            "dayName" to dayName
+                            "month" to month, "dayNumber" to dayNumber, "dayName" to dayName
                         )
                     }
                 }

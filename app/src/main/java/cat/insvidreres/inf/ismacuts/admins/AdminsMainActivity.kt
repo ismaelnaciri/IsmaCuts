@@ -24,6 +24,7 @@ class AdminsMainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         val adminEmail = intent.getStringExtra("adminEmail")
+        println("adminEmail arrive at main activity?  $adminEmail")
 
         if (!adminEmail.isNullOrEmpty()) {
             adminsSharedViewModel.adminEmail = adminEmail

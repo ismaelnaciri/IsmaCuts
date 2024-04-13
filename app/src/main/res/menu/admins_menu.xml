@@ -9,7 +9,7 @@
         android:title="@string/bottom_menu_home" />
 
     <item
-        android:id="@+id/usersBookingFragment"
+        android:id="@+id/adminsDashboardFragment"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:icon="@drawable/baseline_dashboard_24"

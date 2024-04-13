@@ -152,11 +152,6 @@ class UsersBookingFragment : Fragment() {
         }
 
         binding.confirmBookingButton.setOnClickListener {
-            Toast.makeText(
-                requireContext(),
-                "selected items: ${viewModel.selectedOptions}",
-                Toast.LENGTH_LONG
-            ).show()
 
             println("selected items: ${viewModel.selectedOptions}")
 
@@ -189,7 +184,12 @@ class UsersBookingFragment : Fragment() {
                 if (!bookingSharedViewModel.checkIfAnyItemNull()) {
                     println("OKAY OPTIONS IS OKAY")
                     bookingSharedViewModel.generateBookingInsert()
-                    bookingSharedViewModel.insertBooking() {
+                    bookingSharedViewModel.insertBooking {
+                        Toast.makeText(
+                            requireContext(),
+                            "Booking Confirmed!!",
+                            Toast.LENGTH_LONG
+                        ).show()
                         findNavController().navigateUp()
                     }
                 }

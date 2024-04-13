@@ -9,6 +9,7 @@ import android.view.View
 import android.widget.EditText
 import androidx.activity.viewModels
 import androidx.lifecycle.ViewModelProvider
+import cat.insvidreres.inf.ismacuts.admins.AdminsMainActivity
 import cat.insvidreres.inf.ismacuts.recycler.RecyclerActivity
 import cat.insvidreres.inf.ismacuts.databinding.ActivityLoginBinding
 import cat.insvidreres.inf.ismacuts.users.HomeBookingSharedViewModel
@@ -49,8 +50,15 @@ class LoginActivity : AppCompatActivity(), ErrorHandler {
                 val email = binding.loginEmailET.text.toString().lowercase().trim().replace(" ", "")
                 val password = binding.passwordT.text.toString().lowercase().trim().replace(" ", "")
 
-                if (viewModel.loginWithEmailAndPw(email, password)) {
-                    goToMainActivity(this, email)
+                viewModel.loginWithEmailAndPw(email, password) { role ->
+                    when (role) {
+                        "USER" -> {
+                            goToMainActivity(this, email, "USER")
+                        }
+                        "PROFESSIONAL" -> {
+                            goToMainActivity(this, email, "PROFESSIONAL")
+                        }
+                    }
                 }
             }
         }
@@ -58,11 +66,17 @@ class LoginActivity : AppCompatActivity(), ErrorHandler {
     }
 
 
-    private fun goToMainActivity(context: Context, email: String) {
-        val intent = Intent(context, UsersMainActivity::class.java)
-        intent.putExtra("userEmail", email)
-        intent.putExtra("adminEmail", email)
-        startActivity(intent)
+    private fun goToMainActivity(context: Context, email: String, role: String) {
+        if (role == "USER") {
+            val intent = Intent(context, UsersMainActivity::class.java)
+            intent.putExtra("userEmail", email)
+            startActivity(intent)
+        } else if (role == "PROFESSIONAL") {
+            val intent = Intent(context, AdminsMainActivity::class.java)
+            intent.putExtra("adminEmail", email)
+            startActivity(intent)
+        }
+
     }
 
 

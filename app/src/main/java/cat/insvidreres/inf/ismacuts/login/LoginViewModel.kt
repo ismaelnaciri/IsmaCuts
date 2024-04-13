@@ -6,7 +6,9 @@ import cat.insvidreres.inf.ismacuts.repository.Repository
 class LoginViewModel: ViewModel() {
 
 
-    fun loginWithEmailAndPw(email: String, password: String): Boolean {
-        return Repository.signIn(email, password)
+    fun loginWithEmailAndPw(email: String, password: String, onComplete: (String) -> Unit) {
+        Repository.signIn(email, password) {
+            onComplete(it)
+        }
     }
 }

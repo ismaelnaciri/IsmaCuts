@@ -13,26 +13,26 @@ class AdminsHomeViewModel : ViewModel() {
     private var _bookings = MutableLiveData<MutableList<AdminBooking>>()
     val bookings : LiveData<MutableList<AdminBooking>> = _bookings
 
-    var afterParse = mutableListOf<AdminBooking>()
-
     fun loadBookings(adminEmail: String) {
         _bookings.value?.clear()
 
-        Repository.getBookings(adminEmail) {
+        Repository.getBookings(adminEmail, true) {
             viewModelScope.launch {
-                for (book in Repository.bookngsList) {
-                    afterParse.add(
-                        AdminBooking(
-                            book.userEmail,
-                            book.professionalEmail,
-                            book.hour.hour
-                        )
-                    )
-                }
+                println("adminsBookingList from viewModel | ${Repository.adminBookingsList}")
+                _bookings.value = Repository.adminBookingsList
+//                for (book in Repository.adminBookingsList) {
+//                    afterParse.add(
+//                        AdminBooking(
+//                            book.userEmail,
+//                            book.hour,
+//                            book.productName
+//                        )
+//                    )
+//                }
 
-                if (afterParse.isNotEmpty()) {
-                    _bookings.value = afterParse
-                }
+//                if (afterParse.isNotEmpty()) {
+//                    _bookings.value = afterParse
+//                }
             }
         }
     }

@@ -3,6 +3,7 @@ package cat.insvidreres.inf.ismacuts.users
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import cat.insvidreres.inf.ismacuts.model.Professional
 import cat.insvidreres.inf.ismacuts.model.User
 import cat.insvidreres.inf.ismacuts.repository.Repository
@@ -10,6 +11,7 @@ import cat.insvidreres.inf.ismacuts.users.booking.Days
 import cat.insvidreres.inf.ismacuts.users.booking.Hour
 import cat.insvidreres.inf.ismacuts.users.home.Product
 import cat.insvidreres.inf.ismacuts.users.home.Service
+import kotlinx.coroutines.launch
 
 class HomeBookingSharedViewModel : ViewModel() {
 
@@ -114,18 +116,20 @@ class HomeBookingSharedViewModel : ViewModel() {
 
     fun insertBooking(onComplete: () -> Unit) {
         _book.value?.let { book ->
-            Repository.insertBooking(
-                book,
-                onComplete = {
-                    print("Insert correct!!!! PRRRRRRRR")
-                    resetSelectedOptions()
+            viewModelScope.launch {
+                Repository.insertBooking(
+                    book,
+                    onComplete = {
+                        print("Insert correct!!!! PRRRRRRRR")
+                        resetSelectedOptions()
 
-                    onComplete()
-                },
-                onError = {
-                    print("ERROR IN INSERT | $it")
-                }
-            )
+                        onComplete()
+                    },
+                    onError = {
+                        print("ERROR IN INSERT | $it")
+                    }
+                )
+            }
         }
     }
 

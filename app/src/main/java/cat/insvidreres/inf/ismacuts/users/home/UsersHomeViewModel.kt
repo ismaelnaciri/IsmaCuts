@@ -58,7 +58,6 @@ class UsersHomeViewModel : ViewModel() {
         Repository.getProducts(serviceType) {
             viewModelScope.launch {
                 _products.value = Repository.productsList
-                println("very sussy indeed")
             }
         }
     }
