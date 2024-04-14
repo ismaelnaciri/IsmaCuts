@@ -19,6 +19,9 @@
     <color name="gradient_start">#fec707</color>
     <color name="gradient_end">#fea60b</color>
 
+    <color name="green">#00FF00</color>
+    <color name="red">#C70000</color>
+
     <!-- Professional Background colors-->
     <color name="professional_background_light">@color/light_background</color>
     <color name="professional_background_dark">@color/dark_background</color>

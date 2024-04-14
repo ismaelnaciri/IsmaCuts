@@ -53,7 +53,7 @@
             android:id="@+id/mainSlotCardView"
             android:layout_width="370dp"
             android:layout_height="230dp"
-            android:layout_marginTop="40dp"
+            android:layout_marginTop="20dp"
             app:cardCornerRadius="35dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.487"
@@ -107,7 +107,40 @@
             app:layout_constraintHorizontal_bias="0.495"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/mainSlotCardView"
-            app:layout_constraintVertical_bias="0.42" />
+            app:layout_constraintVertical_bias="0.631" />
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="160dp"
+            android:layout_height="35dp"
+            app:layout_constraintBottom_toTopOf="@+id/confirmBookingButton"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/mainSlotCardView"
+            app:layout_constraintVertical_bias="0.517"
+            android:layout_marginEnd="56dp"
+            app:cardCornerRadius="30dp"
+            >
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:gravity="end"
+                android:background="@drawable/booking_selected_item_corner_background"
+                >
+                <TextView
+                    android:id="@+id/bookingProductCostTV"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="?attr/textColor"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:text="TextView"
+                    android:layout_marginEnd="9dp"
+                    />
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

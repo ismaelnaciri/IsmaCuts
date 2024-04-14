@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 class AdminsHomeViewModel : ViewModel() {
 
     private var _bookings = MutableLiveData<MutableList<AdminBooking>>()
-    val bookings : LiveData<MutableList<AdminBooking>> = _bookings
+    val bookings: LiveData<MutableList<AdminBooking>> = _bookings
 
     fun loadBookings(adminEmail: String) {
         _bookings.value?.clear()
@@ -22,6 +22,30 @@ class AdminsHomeViewModel : ViewModel() {
                 println("adminsBookingList from viewModel | ${Repository.adminBookingsList}")
                 _bookings.value = Repository.adminBookingsList
             }
+        }
+    }
+
+    fun confirmBooking(professionalEmail: String, booking: AdminBooking, onComplete: () -> Unit) {
+        viewModelScope.launch {
+            Repository.confirmBooking(professionalEmail, booking, onComplete = {
+                println("hope it works, confirm")
+
+            },
+                onError = {
+                    println("ERROR | $it")
+                })
+
+            onComplete()
+        }
+    }
+
+    fun deleteBooking(professionalEmail: String, booking: AdminBooking, onComplete: () -> Unit) {
+        viewModelScope.launch {
+            Repository.deleteBooking(professionalEmail, booking) {
+                println("hope it works, delete")
+            }
+
+            onComplete()
         }
     }
 }

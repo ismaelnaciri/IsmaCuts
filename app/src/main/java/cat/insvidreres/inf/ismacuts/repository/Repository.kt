@@ -347,6 +347,7 @@ class Repository : ErrorHandler {
                                     service["name"].toString(),
                                     service["img"].toString(),
                                     service["serviceType"].toString(),
+                                    service["price"] as Number
                                 )
                             )
                         }
@@ -364,6 +365,7 @@ class Repository : ErrorHandler {
                                             service["name"] as String,
                                             service["img"] as String,
                                             service["serviceType"] as String,
+                                            service["price"] as Number
                                         )
                                     )
                                 }
@@ -457,6 +459,185 @@ class Repository : ErrorHandler {
             }
         }
 
+        fun confirmBooking(
+            professionalEmail: String,
+            booking: AdminBooking,
+            onComplete: () -> Unit,
+            onError: (String) -> Unit
+        ) {
+            val db = Firebase.firestore
+
+            GlobalScope.launch(Dispatchers.IO) {
+                if (professionalEmail.isNotEmpty()) {
+                    try {
+                        db.collection("bookings").document(professionalEmail).get()
+                            .addOnSuccessListener { documentSnapshot ->
+                                val data = documentSnapshot.data
+                                if (data != null && data.containsKey("bookings")) {
+                                    val bookings =
+                                        data["bookings"] as? MutableList<Map<String, Any>>
+
+                                    bookings?.forEach { item ->
+                                        val userEmail = item["userEmail"].toString()
+                                        val productData = item["product"] as? Map<*, *>
+                                        val product = productData?.let {
+                                            Product(
+                                                it["name"] as? String ?: "",
+                                                it["serviceType"] as? String ?: "",
+                                                it["img"] as? String ?: "",
+                                                it["price"] as? Number ?: 0.0
+                                            )
+                                        }
+
+                                        val profEmail = item["professionalEmail"].toString()
+                                        val dayData = item["day"] as? Map<*, *>
+                                        val day = dayData?.let {
+                                            Days(
+                                                it["day"] as? Number ?: 0,
+                                                it["dayOfWeek"] as? String ?: ""
+                                            )
+                                        }
+                                        val hourData = item["hour"] as? Map<*, *>
+                                        val hour = hourData?.let {
+                                            Hour(
+                                                it["hour"] as? String ?: ""
+                                            )
+                                        }
+
+                                        if (userEmail == booking.userEmail &&
+                                            profEmail == professionalEmail &&
+                                            product?.name == booking.productName &&
+                                            day?.day == booking.day.day &&
+                                            day.dayOfWeek == booking.day.dayOfWeek &&
+                                            hour?.hour == booking.hour
+                                        ) {
+                                            val currentMonth =
+                                                Calendar.getInstance().get(Calendar.MONTH)
+                                            db.collection("revenue")
+                                                .document(professionalEmail)
+                                                .get()
+                                                .addOnSuccessListener { documentSnapshot ->
+                                                    val main =
+                                                        documentSnapshot.data?.get("data") as? List<Map<String, Any>>
+                                                    val currentMonthValues =
+                                                        main?.getOrNull(currentMonth)?.toMutableMap()
+                                                    if (currentMonthValues != null) {
+                                                        val daysArray =
+                                                            currentMonthValues["days"] as? MutableList<Map<String, Any>>
+                                                        val foundDay =
+                                                            daysArray?.find { it["dayNumber"] == booking.day.day } as? MutableMap<String, Any>
+                                                        if (foundDay != null) {
+                                                            // If day exists, update revenue
+                                                            val oldRevenue =
+                                                                foundDay["revenue"] as? Double ?: 0.0
+                                                            val newRevenue =
+                                                                oldRevenue + booking.price.toDouble()
+                                                            foundDay["revenue"] = newRevenue
+
+                                                        } else {
+                                                            // If day doesn't exist, create a new map and add it to daysArray
+                                                            val newDayMap = mapOf(
+                                                                "dayNumber" to booking.day.day,
+                                                                "revenue" to booking.price.toDouble()
+                                                            )
+                                                            daysArray?.add(newDayMap)
+                                                        }
+                                                        // Update the "data" field in Firestore
+                                                        db.collection("revenue")
+                                                            .document(professionalEmail)
+                                                            .update("data", main)
+                                                            .addOnSuccessListener {
+                                                                println("Revenue updated successfully.")
+                                                                deleteBooking(professionalEmail, booking) {
+                                                                    adminBookingsList.remove(booking)
+                                                                    println("adminBookings after delete $adminBookingsList")
+                                                                    onComplete()
+                                                                }
+                                                            }
+                                                            .addOnFailureListener { e ->
+                                                                println("Error updating revenue: $e")
+                                                                onError("Error updating revenue: $e")
+                                                            }
+
+                                                        bookings.remove(item)
+                                                    } else {
+                                                        println("Current month data is null.")
+                                                        onError("Current month data is null.")
+                                                    }
+                                                }
+                                        }
+                                    }
+                                }
+                            }
+                    } catch (e: Exception) {
+                        println("Error confirming booking ${e.message}")
+                        onError("Error confirming booking ${e.message}")
+                    }
+                }
+            }
+        }
+
+
+
+        fun deleteBooking(
+            professionalEmail: String,
+            booking: AdminBooking,
+            onComplete: () -> Unit
+        ) {
+            val db = Firebase.firestore
+
+            GlobalScope.launch(Dispatchers.IO) {
+                try {
+                    db.collection("bookings").document(professionalEmail).get()
+                        .addOnSuccessListener { documentSnapshot ->
+                            val data = documentSnapshot.data
+                            if (data != null && data.containsKey("bookings")) {
+                                val bookings =
+                                    data["bookings"] as? MutableList<Map<String, Any>> ?: mutableListOf()
+
+                                // Filter out the entry to be deleted
+                                val filteredBookings = bookings.filter { item ->
+                                    val userEmail = item["userEmail"] as? String ?: ""
+                                    val productData = item["product"] as? Map<*, *>
+                                    val productName = productData?.get("name") as? String ?: ""
+                                    val dayData = item["day"] as? Map<*, *>
+                                    val day = dayData?.let {
+                                        Days(
+                                            it["day"] as? Number ?: 0,
+                                            it["dayOfWeek"] as? String ?: ""
+                                        )
+                                    }
+                                    val hourData = item["hour"] as? Map<*, *>
+                                    val hour = hourData?.get("hour") as? String ?: ""
+
+                                    !(userEmail == booking.userEmail &&
+                                            productName == booking.productName &&
+                                            day?.day == booking.day.day &&
+                                            day.dayOfWeek == booking.day.dayOfWeek &&
+                                            hour == booking.hour)
+                                }.toMutableList()
+
+                                db.collection("bookings").document(professionalEmail)
+                                    .update("bookings", filteredBookings)
+                                    .addOnSuccessListener {
+                                        println("Booking deleted successfully.")
+                                        onComplete()
+                                    }
+                                    .addOnFailureListener { e ->
+                                        println("Error deleting booking: ${e.message}")
+                                    }
+                            } else {
+                                println("No bookings found.")
+                                onComplete()
+                            }
+                        }
+                } catch (e: Exception) {
+                    println("Error deleting booking: ${e.message}")
+                }
+            }
+        }
+
+
         //TODO Make so that the admin can confirm or cancel a booking in their recycler
         //If confirmed add the value to the current day revenue field of "revenue" collection
         fun getBookings(email: String, isProfessional: Boolean, onComplete: () -> Unit) {
@@ -486,7 +667,8 @@ class Repository : ErrorHandler {
                                             Product(
                                                 it["name"] as? String ?: "",
                                                 it["serviceType"] as? String ?: "",
-                                                it["img"] as? String ?: ""
+                                                it["img"] as? String ?: "",
+                                                it["price"] as? Number ?: 0.0
                                             )
                                         }
 
@@ -507,7 +689,10 @@ class Repository : ErrorHandler {
                                             )
                                         }
 
-                                        getDetailsWithEmail(userEmail, !isProfessional) { //To get user data
+                                        getDetailsWithEmail(
+                                            userEmail,
+                                            !isProfessional
+                                        ) { //To get user data
                                             if (product != null && day != null && hour != null) {
                                                 println("usersList $usersList")
                                                 if (isProfessional) {
@@ -517,7 +702,9 @@ class Repository : ErrorHandler {
                                                                 i.username,
                                                                 day,
                                                                 hour.hour,
-                                                                product.name
+                                                                product.name,
+                                                                userEmail,
+                                                                product.price
                                                             )
                                                         )
                                                     }
@@ -772,7 +959,12 @@ class Repository : ErrorHandler {
             }
         }
 
-        fun getRevenueFromProfessional(professionalEmail: String, currentMonth: Int, onComplete: () -> Unit, onMonthOutOfBounds: () -> Unit) {
+        fun getRevenueFromProfessional(
+            professionalEmail: String,
+            currentMonth: Int,
+            onComplete: () -> Unit,
+            onMonthOutOfBounds: () -> Unit
+        ) {
             val db = Firebase.firestore
 
             GlobalScope.launch(Dispatchers.IO) {
@@ -785,7 +977,8 @@ class Repository : ErrorHandler {
                             if (main != null) {
                                 if (currentMonth < main.size) {
                                     val currentMonthValues = main[currentMonth]
-                                    val daysArray = currentMonthValues["days"] as List<Map<String, Any>>
+                                    val daysArray =
+                                        currentMonthValues["days"] as List<Map<String, Any>>
                                     daysArray.forEach { item ->
                                         val dayNumber = item["dayNumber"] as Number
                                         val revenue = item["revenue"] as Number

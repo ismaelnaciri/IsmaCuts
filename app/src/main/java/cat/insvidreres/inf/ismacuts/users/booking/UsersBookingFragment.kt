@@ -31,7 +31,6 @@ class UsersBookingFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
 
-        //TODO professionalsRV layout and check it works, click appointment and insert it
         binding = FragmentUsersBookingBinding.inflate(inflater)
         val dayRecyclerView = binding.bookingDaysRecyclerView
         val hoursRecyclerView = binding.availableHoursRecyclerView
@@ -44,6 +43,14 @@ class UsersBookingFragment : Fragment() {
         //Handle hardware back button
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
             findNavController().navigateUp()
+        }
+
+        for (item in bookingSharedViewModel.selectedOptions) {
+            if (item::class.java == Product::class.java) {
+                val product = item as Product
+                println("product parsed inside loop | $product")
+                binding.bookingProductCostTV.text = "Total price: " + product.price.toString() + " €"
+            } else continue
         }
 
         dayRecyclerView.layoutManager =
@@ -190,8 +197,9 @@ class UsersBookingFragment : Fragment() {
                             "Booking Confirmed!!",
                             Toast.LENGTH_LONG
                         ).show()
-                        findNavController().navigateUp()
                     }
+                    findNavController().navigateUp()
+
                 }
 
                 hourAdapter.notifyDataSetChanged()

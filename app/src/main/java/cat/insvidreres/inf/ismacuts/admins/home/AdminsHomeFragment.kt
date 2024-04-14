@@ -26,13 +26,35 @@ class AdminsHomeFragment : Fragment() {
 
         bookingRecyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
 
+        var adminBookingAdapter: AdminBookingAdapter? = null
+        adminBookingAdapter = AdminBookingAdapter(
+            requireContext(),
+            mutableListOf(),
+            confirmClickListener = { selectedBooking ->
+                println("inside confirm listener")
+                viewModel.confirmBooking(adminViewModel.adminEmail, selectedBooking) {
+                    adminBookingAdapter?.dataset?.remove(selectedBooking)
+                    adminBookingAdapter?.notifyDataSetChanged()
+                }
+            },
+            deleteClickListener = { selectedBooking ->
+                println("inside delete listener")
+
+                viewModel.deleteBooking(adminViewModel.adminEmail, selectedBooking) {
+                    adminBookingAdapter?.dataset?.remove(selectedBooking)
+                    adminBookingAdapter?.notifyDataSetChanged()
+                }
+            },
+        )
+
         println("adminEmail arrive at main activity?  ${adminViewModel.adminEmail}")
         viewModel.loadBookings(adminViewModel.adminEmail)
 
         viewModel.bookings.observe(viewLifecycleOwner) { booksList ->
-            val adapter = AdminBookingAdapter(requireContext(), booksList)
-            bookingRecyclerView.adapter = adapter
+            adminBookingAdapter.dataset = booksList
+            binding.bookingAdminRV.adapter = adminBookingAdapter
         }
+
         return binding.root
     }
 }

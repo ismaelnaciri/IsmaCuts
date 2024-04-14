@@ -2,13 +2,17 @@ package cat.insvidreres.inf.ismacuts.admins.home
 
 import android.content.Context
 import android.view.LayoutInflater
+import android.view.View
+import android.view.View.OnClickListener
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import cat.insvidreres.inf.ismacuts.databinding.BookingAdminItemBinding
 
 class AdminBookingAdapter(
     val context: Context,
-    var dataset: MutableList<AdminBooking>
+    var dataset: MutableList<AdminBooking>,
+    val confirmClickListener: (AdminBooking) -> Unit,
+    val deleteClickListener: (AdminBooking) -> Unit
 ) : RecyclerView.Adapter<AdminBookingAdapter.AdminBookingViewHolder>() {
 
     inner class AdminBookingViewHolder(var binding: BookingAdminItemBinding) :
@@ -17,9 +21,34 @@ class AdminBookingAdapter(
             binding.bookingAdminIndexTV.text = position.toString()
             binding.adminBookRVUserName.text = adminBooking.userName
             if (adminBooking.day.day != 0 && adminBooking.day.dayOfWeek != "") {
-                binding.adminBookingRVTimeTV.text = adminBooking.day.dayOfWeek + " " + adminBooking.day.day + "\n" +adminBooking.hour
+                binding.adminBookingRVTimeTV.text = "${adminBooking.day.dayOfWeek} ${adminBooking.day.day}\n${adminBooking.hour}"
             }
             binding.adminBookingRVProductName.text = adminBooking.productName
+
+            println("isConfirmListener null? ${confirmClickListener == null} | isDeleteListener null? ${deleteClickListener == null}")
+
+            if (adminBooking.isSelected) {
+                binding.confirmBookingButton.visibility = View.VISIBLE
+                binding.deleteBookingButton.visibility = View.VISIBLE
+            } else {
+                binding.confirmBookingButton.visibility = View.GONE
+                binding.deleteBookingButton.visibility = View.GONE
+            }
+
+            binding.confirmBookingButton.setOnClickListener {
+                println("clicked confirm button")
+                confirmClickListener(adminBooking)
+            }
+
+            binding.deleteBookingButton.setOnClickListener {
+                println("clicked delete button")
+                deleteClickListener(adminBooking)
+            }
+
+            binding.contentLayout.setOnClickListener {
+                adminBooking.isSelected = !adminBooking.isSelected
+                notifyItemChanged(adapterPosition)
+            }
         }
     }
 
@@ -42,6 +71,4 @@ class AdminBookingAdapter(
     override fun getItemCount(): Int {
         return dataset.size
     }
-
-
 }
