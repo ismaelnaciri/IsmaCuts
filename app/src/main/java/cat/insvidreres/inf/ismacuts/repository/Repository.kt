@@ -2,6 +2,7 @@ package cat.insvidreres.inf.ismacuts.repository
 
 import android.net.Uri
 import android.util.Log
+import cat.insvidreres.inf.ismacuts.admins.dashboard.RevenueData
 import cat.insvidreres.inf.ismacuts.admins.home.AdminBooking
 import cat.insvidreres.inf.ismacuts.model.Professional
 import cat.insvidreres.inf.ismacuts.model.User
@@ -47,6 +48,7 @@ class Repository : ErrorHandler {
         var usersList = mutableListOf<User>()
         var bookngsList = mutableListOf<Booking>()
         var adminBookingsList = mutableListOf<AdminBooking>()
+        var revenueList = mutableListOf<RevenueData>()
 
         fun insertUser(user: User) {
             user.password = encryptPassword(user.password)
@@ -456,6 +458,7 @@ class Repository : ErrorHandler {
         }
 
         //TODO Make so that the admin can confirm or cancel a booking in their recycler
+        //If confirmed add the value to the current day revenue field of "revenue" collection
         fun getBookings(email: String, isProfessional: Boolean, onComplete: () -> Unit) {
 
             val db = Firebase.firestore
@@ -767,6 +770,53 @@ class Repository : ErrorHandler {
                     }
                 }
             }
+        }
+
+        fun getRevenueFromProfessional(professionalEmail: String, currentMonth: Int, onComplete: () -> Unit, onMonthOutOfBounds: () -> Unit) {
+            val db = Firebase.firestore
+
+            GlobalScope.launch(Dispatchers.IO) {
+                try {
+                    db.collection("revenue")
+                        .document(professionalEmail)
+                        .get()
+                        .addOnSuccessListener {
+                            val main = it.data?.get("data") as List<Map<String, Any>>
+                            if (main != null) {
+                                if (currentMonth < main.size) {
+                                    val currentMonthValues = main[currentMonth]
+                                    val daysArray = currentMonthValues["days"] as List<Map<String, Any>>
+                                    daysArray.forEach { item ->
+                                        val dayNumber = item["dayNumber"] as Number
+                                        val revenue = item["revenue"] as Number
+
+                                        if (dayNumber != null && revenue != null) {
+                                            revenueList.add(RevenueData(dayNumber, revenue))
+                                        }
+                                    }
+                                    onComplete()
+                                    println("RevenueList | $revenueList")
+                                    println("currentMonth | ${loadMonth(currentMonth)}")
+                                } else {
+                                    println("currentMonth bigger that size of arra |  currentMonth $currentMonth | arraySize ${main.size}")
+                                    onMonthOutOfBounds()
+                                }
+                            } else {
+                                println("data array wan empty gg")
+                            }
+                        }
+                } catch (e: Exception) {
+                    println("error | ${e.message}")
+                }
+
+            }
+        }
+
+        private fun loadMonth(currentMonth: Int): String {
+            val calendar = Calendar.getInstance()
+            calendar.set(Calendar.MONTH, currentMonth)
+            val dateFormat = android.icu.text.SimpleDateFormat("MMMM", Locale.getDefault())
+            return dateFormat.format(calendar.time)
         }
 
         fun deleteUser(user: User, onComplete: () -> Unit) {

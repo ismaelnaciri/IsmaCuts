@@ -1,18 +1,85 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     >
 
-    <FrameLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".admins.dashboard.AdminsDashboardFragment">
 
+
+        <TextView
+            android:id="@+id/adminDashboardGreetingTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="72dp"
+            android:text="Greetings, "
+            android:textColor="?attr/textColor"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+        <TextView
+            android:id="@+id/dashboardMonthRevenueTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginBottom="28dp"
+            android:text="Revenue for "
+            android:textColor="?attr/textColor"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toTopOf="@+id/chart"
+            app:layout_constraintStart_toStartOf="parent" />
+
+
         <com.github.mikephil.charting.charts.BarChart
             android:id="@+id/chart"
             android:layout_width="match_parent"
-            android:layout_height="300dp"/>
+            android:layout_height="350dp"
+            android:layout_marginBottom="100dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent" />
 
-    </FrameLayout>
+        <Button
+            android:id="@+id/dashboardPreviousMonthButton"
+            android:layout_width="160dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginBottom="28dp"
+            android:text="Previous Month"
+            android:textColor="?attr/textColor"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:background="@drawable/main_gradient"
+            app:layout_constraintBottom_toTopOf="@+id/dashboardMonthRevenueTV"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/adminDashboardGreetingTV"
+            app:layout_constraintVertical_bias="1.0" />
+
+        <Button
+            android:id="@+id/dashboardNextMonthButton"
+            android:layout_width="160dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="88dp"
+            android:background="@drawable/main_gradient"
+            android:text="Next Month"
+            android:textColor="?attr/textColor"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toTopOf="@+id/chart"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.703"
+            app:layout_constraintStart_toEndOf="@+id/dashboardPreviousMonthButton" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
