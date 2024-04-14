@@ -62,6 +62,8 @@
             android:id="@+id/adminHomeGreetingTV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="60dp"
             android:text="TextView"
             android:textColor="?attr/textColor"
             android:textSize="20sp"

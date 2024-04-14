@@ -12,6 +12,9 @@ class AdminsHomeViewModel : ViewModel() {
     private var _bookings = MutableLiveData<MutableList<AdminBooking>>()
     val bookings: LiveData<MutableList<AdminBooking>> = _bookings
 
+    private var _professionalName = MutableLiveData<String>()
+    val professionalName: LiveData<String> = _professionalName
+
     fun loadBookings(adminEmail: String) {
         _bookings.value?.clear()
         _bookings.value = mutableListOf<AdminBooking>()
@@ -46,6 +49,14 @@ class AdminsHomeViewModel : ViewModel() {
             }
 
             onComplete()
+        }
+    }
+
+    fun loadProfessionalName(professionalEmail: String) {
+        viewModelScope.launch {
+            Repository.getDetailsWithEmail(professionalEmail, true) {
+                _professionalName.value = Repository.professionalList[0].name
+            }
         }
     }
 }

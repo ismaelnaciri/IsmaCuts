@@ -26,6 +26,11 @@ class AdminsHomeFragment : Fragment() {
 
         bookingRecyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
 
+        viewModel.loadProfessionalName(adminViewModel.adminEmail)
+        viewModel.professionalName.observe(viewLifecycleOwner) {
+            binding.adminHomeGreetingTV.text = "Greetings, $it"
+        }
+
         var adminBookingAdapter: AdminBookingAdapter? = null
         adminBookingAdapter = AdminBookingAdapter(
             requireContext(),

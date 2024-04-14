@@ -470,7 +470,6 @@ class Repository : ErrorHandler {
             GlobalScope.launch(Dispatchers.IO) {
                 if (professionalEmail.isNotEmpty()) {
                     try {
-                        // Check if the revenue document exists
                         db.collection("revenue").document(professionalEmail).get()
                             .addOnSuccessListener { documentSnapshot ->
                                 val data = documentSnapshot.data
@@ -481,8 +480,7 @@ class Repository : ErrorHandler {
                                     var currentMonthValues =
                                         main.getOrNull(currentMonth)?.toMutableMap()
                                     if (currentMonthValues == null) {
-                                        // Initialize main list with entries for each month
-                                        main.clear() // Clear the list if it's empty
+                                        main.clear()
                                         for (i in Calendar.JANUARY..Calendar.DECEMBER) {
                                             val monthEntry = mutableMapOf<String, Any>(
                                                 "days" to mutableListOf<Map<String, Any>>(
