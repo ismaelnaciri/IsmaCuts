@@ -470,103 +470,90 @@ class Repository : ErrorHandler {
             GlobalScope.launch(Dispatchers.IO) {
                 if (professionalEmail.isNotEmpty()) {
                     try {
-                        db.collection("bookings").document(professionalEmail).get()
+                        // Check if the revenue document exists
+                        db.collection("revenue").document(professionalEmail).get()
                             .addOnSuccessListener { documentSnapshot ->
                                 val data = documentSnapshot.data
-                                if (data != null && data.containsKey("bookings")) {
-                                    val bookings =
-                                        data["bookings"] as? MutableList<Map<String, Any>>
-
-                                    bookings?.forEach { item ->
-                                        val userEmail = item["userEmail"].toString()
-                                        val productData = item["product"] as? Map<*, *>
-                                        val product = productData?.let {
-                                            Product(
-                                                it["name"] as? String ?: "",
-                                                it["serviceType"] as? String ?: "",
-                                                it["img"] as? String ?: "",
-                                                it["price"] as? Number ?: 0.0
+                                if (data != null && data.containsKey("data")) {
+                                    val main =
+                                        data["data"] as? MutableList<MutableMap<String, Any>> ?: mutableListOf()
+                                    val currentMonth = Calendar.getInstance().get(Calendar.MONTH)
+                                    var currentMonthValues =
+                                        main.getOrNull(currentMonth)?.toMutableMap()
+                                    if (currentMonthValues == null) {
+                                        // Initialize main list with entries for each month
+                                        main.clear() // Clear the list if it's empty
+                                        for (i in Calendar.JANUARY..Calendar.DECEMBER) {
+                                            val monthEntry = mutableMapOf<String, Any>(
+                                                "days" to mutableListOf<Map<String, Any>>(
+                                                    mapOf(
+                                                        "dayNumber" to 1,
+                                                        "revenue" to 0.00
+                                                    )
+                                                )
                                             )
+                                            main.add(monthEntry)
                                         }
-
-                                        val profEmail = item["professionalEmail"].toString()
-                                        val dayData = item["day"] as? Map<*, *>
-                                        val day = dayData?.let {
-                                            Days(
-                                                it["day"] as? Number ?: 0,
-                                                it["dayOfWeek"] as? String ?: ""
-                                            )
-                                        }
-                                        val hourData = item["hour"] as? Map<*, *>
-                                        val hour = hourData?.let {
-                                            Hour(
-                                                it["hour"] as? String ?: ""
-                                            )
-                                        }
-
-                                        if (userEmail == booking.userEmail &&
-                                            profEmail == professionalEmail &&
-                                            product?.name == booking.productName &&
-                                            day?.day == booking.day.day &&
-                                            day.dayOfWeek == booking.day.dayOfWeek &&
-                                            hour?.hour == booking.hour
-                                        ) {
-                                            val currentMonth =
-                                                Calendar.getInstance().get(Calendar.MONTH)
-                                            db.collection("revenue")
-                                                .document(professionalEmail)
-                                                .get()
-                                                .addOnSuccessListener { documentSnapshot ->
-                                                    val main =
-                                                        documentSnapshot.data?.get("data") as? List<Map<String, Any>>
-                                                    val currentMonthValues =
-                                                        main?.getOrNull(currentMonth)?.toMutableMap()
-                                                    if (currentMonthValues != null) {
-                                                        val daysArray =
-                                                            currentMonthValues["days"] as? MutableList<Map<String, Any>>
-                                                        val foundDay =
-                                                            daysArray?.find { it["dayNumber"] == booking.day.day } as? MutableMap<String, Any>
-                                                        if (foundDay != null) {
-                                                            // If day exists, update revenue
-                                                            val oldRevenue =
-                                                                foundDay["revenue"] as? Double ?: 0.0
-                                                            val newRevenue =
-                                                                oldRevenue + booking.price.toDouble()
-                                                            foundDay["revenue"] = newRevenue
-
-                                                        } else {
-                                                            // If day doesn't exist, create a new map and add it to daysArray
-                                                            val newDayMap = mapOf(
-                                                                "dayNumber" to booking.day.day,
-                                                                "revenue" to booking.price.toDouble()
-                                                            )
-                                                            daysArray?.add(newDayMap)
-                                                        }
-                                                        // Update the "data" field in Firestore
-                                                        db.collection("revenue")
-                                                            .document(professionalEmail)
-                                                            .update("data", main)
-                                                            .addOnSuccessListener {
-                                                                println("Revenue updated successfully.")
-                                                                deleteBooking(professionalEmail, booking) {
-                                                                    adminBookingsList.remove(booking)
-                                                                    println("adminBookings after delete $adminBookingsList")
-                                                                    onComplete()
-                                                                }
-                                                            }
-                                                            .addOnFailureListener { e ->
-                                                                println("Error updating revenue: $e")
-                                                                onError("Error updating revenue: $e")
-                                                            }
-
-                                                        bookings.remove(item)
-                                                    } else {
-                                                        println("Current month data is null.")
-                                                        onError("Current month data is null.")
-                                                    }
-                                                }
-                                        }
+                                        currentMonthValues = main[currentMonth]
                                     }
+                                    val daysArray = currentMonthValues["days"] as? MutableList<Map<String, Any>>
+                                    val foundDay = daysArray?.find { it["dayNumber"] == booking.day.day } as? MutableMap<String, Any>
+                                    if (foundDay != null) {
+                                        // If day exists, update revenue
+                                        val oldRevenue = foundDay["revenue"] as? Double ?: 0.0
+                                        val newRevenue = oldRevenue + booking.price.toDouble()
+                                        foundDay["revenue"] = newRevenue
+                                    } else {
+                                        // If day doesn't exist, create a new map and add it to daysArray
+                                        val newDayMap = mapOf(
+                                            "dayNumber" to booking.day.day,
+                                            "revenue" to booking.price.toDouble()
+                                        )
+                                        daysArray?.add(newDayMap)
+                                    }
+                                    // Update the "data" field in Firestore
+                                    db.collection("revenue")
+                                        .document(professionalEmail)
+                                        .update("data", main)
+                                        .addOnSuccessListener {
+                                            println("Revenue updated successfully.")
+                                            // Proceed with deleting the booking
+                                            deleteBooking(professionalEmail, booking) {
+                                                adminBookingsList.remove(booking)
+                                                println("adminBookings after delete $adminBookingsList")
+                                                onComplete()
+                                            }
+                                        }
+                                        .addOnFailureListener { e ->
+                                            println("Error updating revenue: $e")
+                                            onError("Error updating revenue: $e")
+                                        }
+                                } else {
+                                    // Revenue document doesn't exist, create it with initial data for the current month
+                                    val initialData = mutableListOf<Map<String, Any>>()
+                                    for (i in Calendar.JANUARY..Calendar.DECEMBER) {
+                                        val monthEntry = mutableMapOf<String, Any>(
+                                            "days" to mutableListOf<Map<String, Any>>(
+                                                mapOf(
+                                                    "dayNumber" to 1,
+                                                    "revenue" to 0.00
+                                                )
+                                            )
+                                        )
+                                        initialData.add(monthEntry)
+                                    }
+                                    db.collection("revenue")
+                                        .document(professionalEmail)
+                                        .set(mapOf("data" to initialData))
+                                        .addOnSuccessListener {
+                                            println("Revenue document created successfully.")
+                                            // Proceed with the confirmation logic
+                                            confirmBooking(professionalEmail, booking, onComplete, onError)
+                                        }
+                                        .addOnFailureListener { e ->
+                                            println("Error creating revenue document: $e")
+                                            onError("Error creating revenue document: $e")
+                                        }
                                 }
                             }
                     } catch (e: Exception) {
@@ -576,7 +563,6 @@ class Repository : ErrorHandler {
                 }
             }
         }
-
 
 
         fun deleteBooking(
@@ -979,6 +965,9 @@ class Repository : ErrorHandler {
                                     val currentMonthValues = main[currentMonth]
                                     val daysArray =
                                         currentMonthValues["days"] as List<Map<String, Any>>
+
+                                    revenueList.clear() // Clear the list before adding new elements
+
                                     daysArray.forEach { item ->
                                         val dayNumber = item["dayNumber"] as Number
                                         val revenue = item["revenue"] as Number
@@ -987,6 +976,10 @@ class Repository : ErrorHandler {
                                             revenueList.add(RevenueData(dayNumber, revenue))
                                         }
                                     }
+
+                                    // Sort the revenueList based on dayNumber attribute
+                                    revenueList.sortBy { it.dayNumber.toInt() }
+
                                     onComplete()
                                     println("RevenueList | $revenueList")
                                     println("currentMonth | ${loadMonth(currentMonth)}")
@@ -995,15 +988,15 @@ class Repository : ErrorHandler {
                                     onMonthOutOfBounds()
                                 }
                             } else {
-                                println("data array wan empty gg")
+                                println("data array was empty gg")
                             }
                         }
                 } catch (e: Exception) {
                     println("error | ${e.message}")
                 }
-
             }
         }
+
 
         private fun loadMonth(currentMonth: Int): String {
             val calendar = Calendar.getInstance()

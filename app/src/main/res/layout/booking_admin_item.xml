@@ -100,7 +100,8 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/contentLayout"
             android:orientation="horizontal"
-            android:layout_marginTop="8dp">
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="10dp">
 
             <!-- Confirm button -->
             <androidx.cardview.widget.CardView

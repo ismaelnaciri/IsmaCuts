@@ -25,7 +25,6 @@ class AdminBookingAdapter(
             }
             binding.adminBookingRVProductName.text = adminBooking.productName
 
-            println("isConfirmListener null? ${confirmClickListener == null} | isDeleteListener null? ${deleteClickListener == null}")
 
             if (adminBooking.isSelected) {
                 binding.confirmBookingButton.visibility = View.VISIBLE

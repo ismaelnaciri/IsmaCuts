@@ -58,5 +58,16 @@
 
         </androidx.cardview.widget.CardView>
 
+        <TextView
+            android:id="@+id/adminHomeGreetingTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="TextView"
+            android:textColor="?attr/textColor"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
