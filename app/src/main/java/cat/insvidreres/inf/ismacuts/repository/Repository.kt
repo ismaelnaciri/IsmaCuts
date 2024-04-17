@@ -46,7 +46,7 @@ class Repository : ErrorHandler {
         var servicesList = mutableListOf<Service>()
         var productsList = mutableListOf<Product>()
         var usersList = mutableListOf<User>()
-        var bookngsList = mutableListOf<Booking>()
+        var bookingsList = mutableListOf<Booking>()
         var adminBookingsList = mutableListOf<AdminBooking>()
         var revenueList = mutableListOf<RevenueData>()
 
@@ -56,8 +56,10 @@ class Repository : ErrorHandler {
             FirebaseAuth.getInstance().createUserWithEmailAndPassword(user.email, user.password)
                 .addOnCompleteListener {
                     if (it.isSuccessful) {
+                        user.id = user.username + ":" + user.email;
                         addItemToCollection(
                             "users", hashMapOf(
+                                "id" to user.id,
                                 "username" to user.username,
                                 "email" to user.email,
                                 "password" to user.password,
@@ -71,7 +73,6 @@ class Repository : ErrorHandler {
             Log.d("User fields test", "email | ${user.email}  |  password ${user.password}")
         }
 
-        //TODO update signIn method so that it detects somehow when to insert into users and when into professionals
         fun signIn(email: String, password: String, onComplete: (String) -> Unit) {
             getProfessionals("") {
                 try {
@@ -475,7 +476,8 @@ class Repository : ErrorHandler {
                                 val data = documentSnapshot.data
                                 if (data != null && data.containsKey("data")) {
                                     val main =
-                                        data["data"] as? MutableList<MutableMap<String, Any>> ?: mutableListOf()
+                                        data["data"] as? MutableList<MutableMap<String, Any>>
+                                            ?: mutableListOf()
                                     val currentMonth = Calendar.getInstance().get(Calendar.MONTH)
                                     var currentMonthValues =
                                         main.getOrNull(currentMonth)?.toMutableMap()
@@ -494,8 +496,10 @@ class Repository : ErrorHandler {
                                         }
                                         currentMonthValues = main[currentMonth]
                                     }
-                                    val daysArray = currentMonthValues["days"] as? MutableList<Map<String, Any>>
-                                    val foundDay = daysArray?.find { it["dayNumber"] == booking.day.day } as? MutableMap<String, Any>
+                                    val daysArray =
+                                        currentMonthValues["days"] as? MutableList<Map<String, Any>>
+                                    val foundDay =
+                                        daysArray?.find { it["dayNumber"] == booking.day.day } as? MutableMap<String, Any>
                                     if (foundDay != null) {
                                         // If day exists, update revenue
                                         val oldRevenue = foundDay["revenue"] as? Double ?: 0.0
@@ -546,7 +550,12 @@ class Repository : ErrorHandler {
                                         .addOnSuccessListener {
                                             println("Revenue document created successfully.")
                                             // Proceed with the confirmation logic
-                                            confirmBooking(professionalEmail, booking, onComplete, onError)
+                                            confirmBooking(
+                                                professionalEmail,
+                                                booking,
+                                                onComplete,
+                                                onError
+                                            )
                                         }
                                         .addOnFailureListener { e ->
                                             println("Error creating revenue document: $e")
@@ -577,7 +586,8 @@ class Repository : ErrorHandler {
                             val data = documentSnapshot.data
                             if (data != null && data.containsKey("bookings")) {
                                 val bookings =
-                                    data["bookings"] as? MutableList<Map<String, Any>> ?: mutableListOf()
+                                    data["bookings"] as? MutableList<Map<String, Any>>
+                                        ?: mutableListOf()
 
                                 // Filter out the entry to be deleted
                                 val filteredBookings = bookings.filter { item ->
@@ -621,8 +631,73 @@ class Repository : ErrorHandler {
             }
         }
 
+        fun getBookings(userEmail: String, onComplete: () -> Unit) {
+            val db = Firebase.firestore
 
-        //TODO Make so that the admin can confirm or cancel a booking in their recycler
+            GlobalScope.launch(Dispatchers.IO) {
+                if (userEmail.isNotEmpty()) {
+                    db.collection("bookings")
+                        .get()
+                        .addOnSuccessListener {
+                            bookingsList.clear()
+                            for (doc in it) {
+                                val bookings = doc["bookings"] as? MutableList<Map<String, Any>>
+
+                                bookings?.forEach{ item ->
+                                    val user = item["userEmail"].toString()
+
+                                    val productData = item["product"] as? Map<*, *>
+                                    val product = productData?.let {
+                                        Product(
+                                            it["name"] as? String ?: "",
+                                            it["serviceType"] as? String ?: "",
+                                            it["img"] as? String ?: "",
+                                            it["price"] as? Number ?: 0.0
+                                        )
+                                    }
+
+                                    val professionalEmail = item["professionalEmail"].toString()
+
+                                    val dayData = item["day"] as? Map<*, *>
+                                    val day = dayData?.let {
+                                        Days(
+                                            it["day"] as? Number ?: 0,
+                                            it["dayOfWeek"] as? String ?: ""
+                                        )
+                                    }
+
+                                    val hourData = item["hour"] as? Map<*, *>
+                                    val hour = hourData?.let {
+                                        Hour(
+                                            it["hour"] as? String ?: ""
+                                        )
+                                    }
+
+                                    if (user == userEmail
+                                        && product != null
+                                        && day != null
+                                        && hour != null)
+                                    {
+                                        bookingsList.add(
+                                            Booking(
+                                                userEmail,
+                                                product,
+                                                professionalEmail,
+                                                day,
+                                                hour
+                                            )
+                                        )
+                                    }
+                                }
+                            }
+
+                            onComplete()
+                        }
+                }
+            }
+        }
+
+
         //If confirmed add the value to the current day revenue field of "revenue" collection
         fun getBookings(email: String, isProfessional: Boolean, onComplete: () -> Unit) {
 
@@ -633,7 +708,7 @@ class Repository : ErrorHandler {
                     try {
                         db.collection("bookings").document(email).get()
                             .addOnSuccessListener { documentSnapshot ->
-                                bookngsList.clear()
+                                bookingsList.clear()
                                 usersList.clear()
                                 professionalList.clear()
                                 val data = documentSnapshot.data
@@ -693,7 +768,7 @@ class Repository : ErrorHandler {
                                                         )
                                                     }
                                                 } else {
-                                                    bookngsList.add(
+                                                    bookingsList.add(
                                                         Booking(
                                                             userEmail,
                                                             product,
@@ -842,6 +917,73 @@ class Repository : ErrorHandler {
 
             }.addOnFailureListener { e ->
                 Log.d("ERROR Reading storage", e.message.toString())
+            }
+        }
+
+        fun updateProfilePic(email: String, isProfessional: Boolean, imgUri: Uri?) {
+            val db = Firebase.firestore
+            var imageUri: String = ""
+
+            GlobalScope.launch(Dispatchers.IO) {
+                storageRef = FirebaseStorage.getInstance().reference.child("/Images")
+
+                if (isProfessional) {
+                    storageRef = storageRef.child("/Professionals")
+                    storageRef = storageRef.child(email + "-pfp")
+
+                    imgUri?.let { uri ->
+                        storageRef.putFile(uri).addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                storageRef.downloadUrl.addOnSuccessListener { url ->
+                                    imageUri = url.toString()
+
+                                    db.collection("professionals").whereEqualTo("email", email)
+                                        .get()
+                                        .addOnSuccessListener {
+                                            for (user in it) {
+                                                db.collection("professionals")
+                                                    .document(user.id)
+                                                    .update("img", imageUri)
+                                                    .addOnSuccessListener {
+                                                        println("please check the fucking firebase professionals")
+                                                    }
+                                            }
+                                        }
+                                }
+                            } else {
+                                println("Error | ${task.exception}")
+                            }
+                        }
+                    }
+
+                } else {
+                    storageRef = storageRef.child(email + "-pfp")
+
+                    imgUri?.let { uri ->
+                        storageRef.putFile(uri).addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                storageRef.downloadUrl.addOnSuccessListener { url ->
+                                    imageUri = url.toString()
+
+                                    db.collection("users").whereEqualTo("email", email)
+                                        .get()
+                                        .addOnSuccessListener {
+                                            for (user in it) {
+                                                db.collection("users")
+                                                    .document(user.id)
+                                                    .update("img", imageUri)
+                                                    .addOnSuccessListener {
+                                                        println("please check the fucking firebase user")
+                                                    }
+                                            }
+                                        }
+                                }
+                            } else {
+                                println("Error | ${task.exception}")
+                            }
+                        }
+                    }
+                }
             }
         }
 

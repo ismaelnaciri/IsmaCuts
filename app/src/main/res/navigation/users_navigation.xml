@@ -25,4 +25,9 @@
         android:name="cat.insvidreres.inf.ismacuts.settings.SettingsFragment"
         android:label="fragment_settings"
         tools:layout="@layout/fragment_settings" />
+    <fragment
+        android:id="@+id/userDataProfileFragment"
+        android:name="cat.insvidreres.inf.ismacuts.profile.UserDataProfileFragment"
+        android:label="UserDataProfileFragment"
+        tools:layout="@layout/fragment_user_data_profile"/>
 </navigation>

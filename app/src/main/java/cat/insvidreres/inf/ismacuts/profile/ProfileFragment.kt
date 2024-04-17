@@ -1,60 +1,135 @@
 package cat.insvidreres.inf.ismacuts.profile
 
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import cat.insvidreres.inf.ismacuts.R
+import cat.insvidreres.inf.ismacuts.admins.AdminsMainActivity
+import cat.insvidreres.inf.ismacuts.admins.AdminsSharedViewModel
+import cat.insvidreres.inf.ismacuts.databinding.FragmentProfileBinding
+import cat.insvidreres.inf.ismacuts.users.HomeBookingSharedViewModel
+import cat.insvidreres.inf.ismacuts.users.UsersMainActivity
+import com.bumptech.glide.Glide
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [ProfileFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class ProfileFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
+    private lateinit var sharedViewModel: Any
+    private lateinit var binding: FragmentProfileBinding
+    private val viewModel : ProfileViewModel by viewModels()
+    private var imageUri: Uri? = null
+    private var currentImgUrl: Any? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_profile, container, false)
+        binding = FragmentProfileBinding.inflate(inflater)
+        sharedViewModel = if (activity is UsersMainActivity) {
+            activityViewModels<HomeBookingSharedViewModel>().value
+        } else if (activity is AdminsMainActivity) {
+            activityViewModels<AdminsSharedViewModel>().value
+        } else {
+            throw IllegalStateException("Unknown activity type")
+        }
+
+        val email = when (sharedViewModel) {
+            is HomeBookingSharedViewModel -> {
+                (sharedViewModel as HomeBookingSharedViewModel).userEmail
+            }
+            is AdminsSharedViewModel -> {
+                (sharedViewModel as AdminsSharedViewModel).adminEmail
+            }
+            else -> throw IllegalStateException("Unknown sharedViewModel type")
+        }
+
+        println("EMAIL RECEIVED | $email")
+
+        if (activity is UsersMainActivity) {
+            (sharedViewModel as HomeBookingSharedViewModel).userEmail = email
+            binding.profileGoToBookingsFragment.text = "MY BOOKINGS"
+        } else if (activity is AdminsMainActivity) {
+            (sharedViewModel as AdminsSharedViewModel).adminEmail = email
+            binding.profileGoToBookingsFragment.text = "YOUR STATS"
+        }
+
+        binding.profileGoToBookingsFragment.setOnClickListener {
+            if (activity is UsersMainActivity) {
+                if (currentImgUrl.toString() == imageUri.toString()) {
+                    viewModel.updateProfilePic(email, false, imageUri)
+                }
+
+                findNavController().navigate(R.id.userDataProfileFragment)
+            } else if (activity is AdminsMainActivity) {
+                if (currentImgUrl.toString() == imageUri.toString()) {
+                    viewModel.updateProfilePic(email, true, imageUri)
+                }
+                findNavController().navigate(R.id.adminDataFragment)
+            }
+        }
+
+        if (activity is AdminsMainActivity) {
+            viewModel.loadProfessional(email)
+            println("professional? ${viewModel.professional.value}")
+            viewModel.professional.observe(viewLifecycleOwner) { professional ->
+                binding.profileNameTV.text = professional.name
+                binding.profileEmailTV.text = professional.email
+                binding.profileUserNameTV.text = professional.name
+                binding.profileUserPassword.text = professional.password
+                binding.profileIsAdminTV.text = professional.services.toString().substring(1, professional.services.toString().length - 1)
+
+                binding.profilePictureIV.setOnClickListener {
+                    resultLauncher.launch("image/*")
+                }
+
+                Glide.with(binding.profilePictureIV.context).load(professional.img).into(binding.profilePictureIV)
+                currentImgUrl = professional.img
+            }
+
+        } else if (activity is UsersMainActivity) {
+            viewModel.loadUser(email)
+            println("user? ${viewModel.user.value}")
+            viewModel.user.observe(viewLifecycleOwner) { user ->
+                binding.profileNameTV.text = user.username
+                binding.profileEmailTV.text = user.email
+                binding.profileUserNameTV.text = user.username
+
+                val sp = requireContext().getSharedPreferences("UserPreferences", Context.MODE_PRIVATE)
+                val password = sp.getString("password", "")
+
+                if (!password.isNullOrEmpty()) {
+                    binding.profileUserPassword.text = password
+                } else {
+                    binding.profileUserPassword.text = "Click on the remember password to see it here!"
+                }
+
+                binding.profileIsAdminTV.text = user.admin.toString()
+
+                binding.profilePictureIV.setOnClickListener {
+                    resultLauncher.launch("image/*")
+                }
+                Glide.with(binding.profilePictureIV.context).load(user.img).into(binding.profilePictureIV)
+
+            }
+        }
+
+        return binding.root
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment ProfileFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            ProfileFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
+    private val resultLauncher = registerForActivityResult(
+        ActivityResultContracts.GetContent()){
+
+        imageUri = it
+        binding.profilePictureIV.setImageURI(it)
     }
+
 }
