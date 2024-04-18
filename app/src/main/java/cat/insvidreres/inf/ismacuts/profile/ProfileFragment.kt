@@ -27,6 +27,7 @@ class ProfileFragment : Fragment() {
     private val viewModel : ProfileViewModel by viewModels()
     private var imageUri: Uri? = null
     private var currentImgUrl: Any? = null
+    var userEmail: String = ""
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -101,6 +102,7 @@ class ProfileFragment : Fragment() {
             viewModel.user.observe(viewLifecycleOwner) { user ->
                 binding.profileNameTV.text = user.username
                 binding.profileEmailTV.text = user.email
+                userEmail = user.email
                 binding.profileUserNameTV.text = user.username
 
                 val sp = requireContext().getSharedPreferences("UserPreferences", Context.MODE_PRIVATE)

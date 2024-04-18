@@ -199,7 +199,6 @@ class UsersBookingFragment : Fragment() {
                         ).show()
                     }
                     findNavController().navigateUp()
-
                 }
 
                 hourAdapter.notifyDataSetChanged()
