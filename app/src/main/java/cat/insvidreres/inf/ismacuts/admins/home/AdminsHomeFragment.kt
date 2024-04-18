@@ -5,12 +5,14 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import cat.insvidreres.inf.ismacuts.R
 import cat.insvidreres.inf.ismacuts.admins.AdminsSharedViewModel
 import cat.insvidreres.inf.ismacuts.databinding.FragmentAdminsHomeBinding
+import java.util.Calendar
 
 class AdminsHomeFragment : Fragment() {
 
@@ -23,6 +25,8 @@ class AdminsHomeFragment : Fragment() {
     ): View? {
         binding = FragmentAdminsHomeBinding.inflate(inflater)
         val bookingRecyclerView = binding.bookingAdminRV
+        var currentMonth = Calendar.getInstance().get(Calendar.MONTH)
+        var currentDay = Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
 
         bookingRecyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
 
@@ -54,10 +58,25 @@ class AdminsHomeFragment : Fragment() {
 
         println("adminEmail arrive at main activity?  ${adminViewModel.adminEmail}")
         viewModel.loadBookings(adminViewModel.adminEmail)
+        viewModel.loadCurrentMonthRevenueData(adminViewModel.adminEmail, currentMonth,
+            onMonthOutOfBounds = {
+                Toast.makeText(
+                    requireContext(),
+                    "No data found for currentMonth ${viewModel.loadMonth(currentMonth)}",
+                    Toast.LENGTH_SHORT)
+                    .show()
+            },
+            onComplete = {
+                viewModel.loadTodayRevenue(currentDay)
+            })
 
         viewModel.bookings.observe(viewLifecycleOwner) { booksList ->
             adminBookingAdapter.dataset = booksList
             binding.bookingAdminRV.adapter = adminBookingAdapter
+        }
+
+        viewModel.todayRevenue.observe(viewLifecycleOwner) { value ->
+            binding.adminHomeTodayTotalRevenueTV.text = "Today's Revenue: $value €"
         }
 
         return binding.root

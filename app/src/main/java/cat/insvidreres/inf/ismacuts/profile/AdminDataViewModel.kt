@@ -22,7 +22,6 @@ class AdminDataViewModel : ViewModel() {
     val professionalPropertiesList: LiveData<MutableList<Any>> = _professionalPropertiesList
 
     private var _revenueData = MutableLiveData<MutableList<RevenueData>>()
-    val revenueData: LiveData<MutableList<RevenueData>> = _revenueData
 
     var totalRevenue: Float = 0.0f
 
@@ -31,7 +30,6 @@ class AdminDataViewModel : ViewModel() {
             Repository.getDetailsWithEmail(professionalEmail, true) {
                 _professional.value = Repository.professionalList[0]
                 println("_professional value: | ${_professional.value}")
-                //TODO loop through professional properties and insert them into list
                 _professionalPropertiesList.value = mutableListOf<Any>()
                 _professionalPropertiesList.value?.add(Repository.professionalList[0].reviews)
                 _professionalPropertiesList.value?.add(totalRevenue)
