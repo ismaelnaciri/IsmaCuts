@@ -1,11 +1,13 @@
 package cat.insvidreres.inf.ismacuts.main_screen
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.LinearGradient
 import android.graphics.Shader
 import android.graphics.drawable.GradientDrawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
 import cat.insvidreres.inf.ismacuts.R
 import cat.insvidreres.inf.ismacuts.databinding.ActivityMainScreenBinding
@@ -47,6 +49,14 @@ class MainScreenActivity : AppCompatActivity() {
         binding.mainScreenRegisterButton.setOnClickListener {
             val intent = Intent(this, RegisterActivity::class.java)
             startActivity(intent)
+        }
+
+        val sharedPreferences = this.getSharedPreferences("settings", Context.MODE_PRIVATE)
+        val isNightMode = sharedPreferences.getBoolean("nightMode", false)
+        if (isNightMode) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         }
 
 //        Glide.with(binding.mainScreenLogoIV.context).
