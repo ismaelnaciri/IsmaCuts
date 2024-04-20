@@ -6,7 +6,8 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".profile.UserDataProfileFragment">
+        tools:context=".profile.UserDataProfileFragment"
+        android:background="?attr/colorBackground">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/profileBookingFragmentToolbar"

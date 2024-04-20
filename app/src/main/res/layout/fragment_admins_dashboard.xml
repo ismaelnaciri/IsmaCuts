@@ -8,7 +8,8 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".admins.dashboard.AdminsDashboardFragment">
+        tools:context=".admins.dashboard.AdminsDashboardFragment"
+        android:background="?attr/colorBackground">
 
 
         <TextView

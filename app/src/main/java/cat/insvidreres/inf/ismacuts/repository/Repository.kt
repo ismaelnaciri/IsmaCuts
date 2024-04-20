@@ -711,6 +711,7 @@ class Repository : ErrorHandler {
                                 bookingsList.clear()
                                 usersList.clear()
                                 professionalList.clear()
+                                adminBookingsList.clear()
                                 val data = documentSnapshot.data
                                 if (data != null && data.containsKey("bookings")) {
                                     val bookings =
